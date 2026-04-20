@@ -2,31 +2,88 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Branch;
+use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
 
 class AdminUserController extends Controller
 {
     public function index()
     {
-        // Narik semua data User. 
-        // Gua pake 'with' (Eager Loading) biar database lu nggak ngos-ngosan (N+1 Problem) pas narik relasi cabang & jabatan.
-        $users = User::with(['roles', 'branch'])->orderBy('name', 'asc')->get();
-        
-        return view('admin.users.index', compact('users'));
+        $users = User::with(['branch', 'roles'])->orderBy('name', 'asc')->get();
+        $branches = Branch::all();
+        $roles = Role::all();
+
+        return view('admin.users.index', compact('users', 'branches', 'roles'));
     }
 
+    // 1. TAMBAH USER BARU
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'branch_id' => ['required', 'exists:branches,id'],
+            'role' => ['required', 'exists:roles,name'],
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'branch_id' => $request->branch_id,
+            'is_active' => true, // Default aktif
+        ]);
+
+        $user->assignRole($request->role);
+
+        return back()->with('success', 'User berhasil ditambahkan ke sistem!');
+    }
+
+    // 2. UPDATE USER (MUTASI, PROMOSI, STATUS)
+    public function update(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'branch_id' => ['required', 'exists:branches,id'],
+            'role' => ['required', 'exists:roles,name'],
+        ]);
+
+        // Logika Update Data Dasar & Mutasi Cabang
+        $user->update([
+            'name' => $request->name,
+            'branch_id' => $request->branch_id,
+        ]);
+
+        // Logika Ganti Jabatan (Promosi/Demosi)
+        $user->syncRoles($request->role);
+
+        // Update Password Jika Diisi (Opsional)
+        if ($request->filled('password')) {
+            $request->validate(['password' => ['confirmed', Rules\Password::defaults()]]);
+            $user->update(['password' => Hash::make($request->password)]);
+        }
+
+        return back()->with('success', 'Data user berhasil diperbarui!');
+    }
+
+    // 3. TOGGLE AKTIF/NON-AKTIF (KILL SWITCH)
     public function toggleStatus(User $user)
     {
-        // Proteksi: Admin nggak boleh non-aktifin dirinya sendiri
-        if (auth()->id === $user->id) {
+        // Proteksi: ManRisk nggak boleh non-aktifin dirinya sendiri
+        if (auth()->id() === $user->id) {
             return back()->with('error', 'Tindakan ditolak! Anda tidak bisa menonaktifkan akun sendiri.');
         }
 
-        // Saklar On/Off: Kebalikan dari status yang sekarang
         $user->update(['is_active' => !$user->is_active]);
+        $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
-        $statusMessage = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
-        return back()->with('success', "Akun {$user->name} berhasil {$statusMessage}.");
+        return back()->with('success', "Akun {$user->name} berhasil {$status}!");
     }
 }

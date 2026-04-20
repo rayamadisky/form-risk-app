@@ -1,88 +1,63 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
+            {{ __('Dashboard Utama BPR') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-8 border-l-4 border-indigo-500">
                 <div class="p-6 text-gray-900">
-
-                    @role('manrisk')
-                    <h3 class="text-lg font-bold text-green-600">Area Khusus ManRisk</h3>
-                    <p>Ada 5 laporan risiko dari bawahan Anda yang menunggu persetujuan (Approve/Reject).</p>
-                    <a href="{{ route('admin.users.index') }}" class="inline-block mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                        + Edit User
-                    </a>
-                    <a href="{{ route('admin.risk_master.index') }}" class="inline-block mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                        Lihat Riwayat Laporan
-                    </a>
-
-                    <hr class="my-4">
-                    <p class="text-sm text-gray-500">Anda juga bisa input risiko tingkat cabang:</p>
-                    <a href="{{ route('form.risiko') }}" class="inline-block mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                        + Input Form Kacab
-                    </a>
-
-                    @endrole
-
-                    @role('admin')
-                    <h3 class="text-lg font-bold text-red-600">Area Khusus Admin</h3>
-                    <p>Lu bisa setting master data cabang, form pertanyaan, dan ngatur user di sini.</p>
-                    <button class="mt-4 bg-red-500 text-white px-4 py-2 rounded">Menu Setting Admin</button>
-                    @endrole
-
-                    @if (session('success'))
-                    <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                        <strong class="font-bold">Sukses!</strong>
-                        <span class="block sm:inline">{{ session('success') }}</span>
+                    <h3 class="text-2xl font-extrabold text-gray-800">Selamat Datang, {{ Auth::user()->name }}!</h3>
+                    <div class="mt-2 flex gap-4 text-sm text-gray-600">
+                        <p>📍 Cabang: <span class="font-bold text-gray-900">{{ Auth::user()->branch->nama_cabang ?? 'Pusat (HQ)' }}</span></p>
+                        <p>🏢 Jabatan: <span class="font-bold text-indigo-700 uppercase">{{ Auth::user()->roles->first()->name ?? 'Tidak Ada Jabatan' }}</span></p>
                     </div>
-                    @endif
-
-                    @role('teller')
-                    <h3 class="text-lg font-bold text-blue-600">Area Teller (Maker)</h3>
-                    <p>Silakan input laporan kejadian risiko operasional harian di loket Anda.</p>
-                    <a href="{{ route('form.risiko') }}" class="inline-block mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                        + Input Form Risiko
-                    </a>
-                    @endrole
-
-                    @role('kacab')
-                    <h3 class="text-lg font-bold text-green-600">Area Kepala Cabang (Checker)</h3>
-                    <p>Ada 5 laporan risiko dari bawahan Anda yang menunggu persetujuan (Approve/Reject).</p>
-                    <a href="{{ route('review.laporan') }}" class="inline-block mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                        + Review Laporan Bawahan
-                    </a>
-                    <a href="{{ route('risk.history') }}" class="inline-block mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                        Lihat Riwayat Laporan
-                    </a>
-
-                    <hr class="my-4">
-                    <p class="text-sm text-gray-500">Anda juga bisa input risiko tingkat cabang:</p>
-                    <a href="{{ route('form.risiko') }}" class="inline-block mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                        + Input Form Kacab
-                    </a>
-
-                    @endrole
-
-                    @role('cs')
-                    <div class="mt-4 p-4 bg-purple-100 border-l-4 border-purple-500">
-                        <h3 class="text-lg font-bold text-purple-700">Area Customer Service (Maker)</h3>
-                        <p>Input potensi risiko operasional dari sisi pelayanan nasabah di sini.</p>
-                        <button class="mt-2 bg-purple-500 text-white px-4 py-2 rounded">+ Form Risiko CS</button>
-                    </div>
-                    @endrole
-
-                    @role('security')
-                    <div class="mt-4 p-4 bg-yellow-100 border-l-4 border-yellow-500">
-                        <h3 class="text-lg font-bold text-yellow-700">Area Security (Maker)</h3>
-                        <p>Lapor kejadian terkait keamanan fisik atau fasilitas kantor di sini.</p>
-                        <button class="mt-2 bg-yellow-600 text-white px-4 py-2 rounded">+ Form Risiko Keamanan</button>
-                    </div>
-                    @endrole
                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                @hasanyrole('teller|ca|csr|security|kacab')
+                <a href="{{ route('form.risiko') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-blue-50 transition border-t-4 border-t-blue-500 group">
+                    <div class="text-blue-500 mb-2 text-3xl group-hover:scale-110 transition-transform">📝</div>
+                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">Input Laporan Risiko</h5>
+                    <p class="font-normal text-gray-600 text-sm">Laporkan indikasi risiko operasional, selisih kas, atau kejadian lainnya sesuai SOP.</p>
+                </a>
+                @endhasanyrole
+
+                @hasanyrole('kacab|korwil')
+                <a href="{{ route('review.laporan') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-yellow-50 transition border-t-4 border-t-yellow-500 group">
+                    <div class="text-yellow-500 mb-2 text-3xl group-hover:scale-110 transition-transform">⚖️</div>
+                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">Review & Tindak Lanjut</h5>
+                    <p class="font-normal text-gray-600 text-sm">Validasi laporan dari bawahan Anda (Approve/Reject) dan pantau status penyelesaiannya.</p>
+                </a>
+                @endhasanyrole
+
+                @hasanyrole('kacab|korwil|manrisk')
+                <a href="{{ route('risk.history') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-green-50 transition border-t-4 border-t-green-500 group">
+                    <div class="text-green-500 mb-2 text-3xl group-hover:scale-110 transition-transform">📊</div>
+                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">Riwayat & Monitoring</h5>
+                    <p class="font-normal text-gray-600 text-sm">Akses pusat data laporan risiko. Analisa total kejadian dan akumulasi kerugian finansial.</p>
+                </a>
+                @endhasanyrole
+
+                @hasrole('manrisk')
+                <a href="{{ route('admin.risk_master.index') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-purple-50 transition border-t-4 border-t-purple-500 group">
+                    <div class="text-purple-500 mb-2 text-3xl group-hover:scale-110 transition-transform">⚙️</div>
+                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">Master Data Risiko</h5>
+                    <p class="font-normal text-gray-600 text-sm">Pusat kendali "Bank Soal". Kelola daftar pertanyaan, penyebab, dan mitigasi untuk semua cabang.</p>
+                </a>
+
+                <a href="{{ route('admin.users.index') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-red-50 transition border-t-4 border-t-red-500 group">
+                    <div class="text-red-500 mb-2 text-3xl group-hover:scale-110 transition-transform">👥</div>
+                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">Manajemen Pengguna</h5>
+                    <p class="font-normal text-gray-600 text-sm">Kontrol akses seluruh pegawai BPR. Atur mutasi cabang dan non-aktifkan akun yang mencurigakan.</p>
+                </a>
+                @endhasrole
+
             </div>
         </div>
     </div>

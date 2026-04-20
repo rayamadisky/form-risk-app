@@ -106,26 +106,49 @@ class RiskReportController extends Controller
     }
 
     // VIEW 3: RIWAYAT (HISTORY)
-    public function index()
+    // VIEW 3: RIWAYAT & MONITORING KESELURUHAN (DENGAN FILTER)
+    public function index(Request $request)
     {
         $user = Auth::user();
         $role = $user->roles->first()->name;
 
-        $query = RiskReport::with(['user', 'item', 'cause', 'branch']);
+        // Tambahin 'cause.mitigations' biar database narik sekalian solusi dari master data
+        $query = RiskReport::with(['user', 'item', 'cause.mitigations', 'branch']);
 
-        // Filter Riwayat berdasarkan Jabatan
+        // 2. Filter Otoritas (Tembok Keamanan)
         if ($role === 'kacab') {
             $query->where('branch_id', $user->branch_id);
+            $branches = collect(); // Kacab nggak butuh milih cabang
         } elseif ($role === 'korwil') {
-            $branchIds = Branch::where('korwil_id', $user->id)->pluck('id');
+            $branchIds = \App\Models\Branch::where('korwil_id', $user->id)->pluck('id');
             $query->whereIn('branch_id', $branchIds);
-        } 
-        // ManRisk biarin aja, bakal narik semuanya
+            $branches = \App\Models\Branch::whereIn('id', $branchIds)->get(); // Korwil cuma lihat cabangnya
+        } else {
+            // ManRisk (Dewa) bisa lihat semua cabang
+            $branches = \App\Models\Branch::all();
+        }
 
-        $reports = $query->orderBy('updated_at', 'desc')->get();
+        // 3. Eksekusi Filter Dinamis dari Request (Form GET)
+        
+        // Filter Cabang (Hanya berlaku untuk ManRisk & Korwil)
+        if ($request->filled('branch_id') && in_array($role, ['manrisk', 'korwil'])) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+        // Filter Rentang Waktu (Berdasarkan tanggal kejadian)
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('tanggal_kejadian', [$request->start_date, $request->end_date]);
+        }
+
+        // 4. Tarik Datanya
+        $reports = $query->orderBy('tanggal_kejadian', 'desc')->get();
+        
+        // 5. Hitung Metrik Dashboard
         $totalLoss = $reports->where('approval_status', 'approved')->sum('dampak_finansial');
+        $totalKejadian = $reports->count();
+        $totalRejected = $reports->where('approval_status', 'rejected')->count();
 
-        return view('risk_reports.index', compact('reports', 'totalLoss'));
+        return view('risk_reports.index', compact('reports', 'totalLoss', 'totalKejadian', 'totalRejected', 'branches', 'role'));
     }
 
     // UPDATE TINDAK LANJUT (RESOLUTION)
