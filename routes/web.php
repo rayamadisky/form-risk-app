@@ -7,7 +7,7 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Admin\RiskMasterController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard', function () {
