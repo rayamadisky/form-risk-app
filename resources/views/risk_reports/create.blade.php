@@ -12,6 +12,8 @@
                 <form action="{{ route('form.risiko.store') }}" method="POST" id="riskForm">
                     @csrf
 
+                    <input type="hidden" name="kategori" value="{{ $kategori }}">
+
                     <h3 class="text-lg font-bold border-b pb-2 mb-4 text-blue-700">1. Identitas Kejadian</h3>
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div>
@@ -68,12 +70,51 @@
                         <textarea name="mitigasi_tambahan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" rows="2" placeholder="Ketik mitigasi tambahan di sini..."></textarea>
                     </div>
 
-                    <h3 class="text-lg font-bold border-b pb-2 mb-4 mt-6 text-blue-700">3. Dampak Finansial</h3>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700">Seberapa besar kerugian (Rp) <span class="text-red-500">*</span></label>
-                        <input type="text" id="nominalInput" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Contoh: 150,000" required>
-                        <input type="hidden" name="dampak_finansial" id="nominalReal">
+                    @if($kategori === 'finansial')
+                    <div class="mt-8 border-b pb-2 mb-4">
+                        <h3 class="text-lg font-bold text-blue-600">3. Dampak Finansial</h3>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Seberapa besar kerugian (Rp) <span class="text-red-500">*</span></label>
+                        <input type="number" name="dampak_finansial" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Contoh: 150000">
+                    </div>
+                    @else
+                    <div class="mt-8 border-b pb-2 mb-4">
+                        <h3 class="text-lg font-bold text-orange-600">3. Analisa Dampak Non-Finansial</h3>
+                    </div>
+
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <label class="block text-sm font-bold text-gray-800 mb-2">Seberapa besar dampak kerugian yang timbul? <span class="text-red-500">*</span></label>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border border-gray-300 rounded hover:bg-white cursor-pointer transition">
+                                <input type="radio" name="skala_dampak" value="Sangat Tinggi" required class="h-4 w-4 text-orange-600 focus:ring-orange-500">
+                                <span class="ml-3 text-sm font-bold text-gray-700">Sangat Tinggi</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded hover:bg-white cursor-pointer transition">
+                                <input type="radio" name="skala_dampak" value="Tinggi" class="h-4 w-4 text-orange-600 focus:ring-orange-500">
+                                <span class="ml-3 text-sm font-bold text-gray-700">Tinggi</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded hover:bg-white cursor-pointer transition">
+                                <input type="radio" name="skala_dampak" value="Sedang" class="h-4 w-4 text-orange-600 focus:ring-orange-500">
+                                <span class="ml-3 text-sm font-bold text-gray-700">Sedang</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded hover:bg-white cursor-pointer transition">
+                                <input type="radio" name="skala_dampak" value="Rendah" class="h-4 w-4 text-orange-600 focus:ring-orange-500">
+                                <span class="ml-3 text-sm font-bold text-gray-700">Rendah</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded hover:bg-white cursor-pointer transition">
+                                <input type="radio" name="skala_dampak" value="Sangat Rendah" class="h-4 w-4 text-orange-600 focus:ring-orange-500">
+                                <span class="ml-3 text-sm font-bold text-gray-700">Sangat Rendah</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-800">Penjelasan Dampaknya: <span class="text-red-500">*</span></label>
+                        <p class="text-xs text-gray-500 mb-2">Berikan penjelasan mengenai dampak riil dari potensi risiko tersebut.</p>
+                        <textarea name="dampak_non_finansial" rows="4" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm" placeholder="Ketik kronologi atau rincian dampak di sini..."></textarea>
+                    </div>
+                    @endif
 
                     <div class="flex justify-end">
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-black font-bold py-2 px-6 rounded">
@@ -158,12 +199,12 @@
         causeSelect.addEventListener('change', function() {
             const otherCauseContainer = document.getElementById('otherCauseContainer');
             const otherCauseInput = document.getElementById('otherCauseInput');
-            
+
             const mitigationContainer = document.getElementById('mitigationContainer');
             const mitigationText = document.getElementById('mitigationText');
-            
+
             // Logika Penyebab "Lainnya" (Skenario kemarin)
-            if(this.value === 'other') {
+            if (this.value === 'other') {
                 otherCauseContainer.classList.remove('hidden');
                 otherCauseInput.setAttribute('required', 'required');
             } else {
@@ -176,7 +217,7 @@
             const selectedOption = this.options[this.selectedIndex];
             const mitigasi = selectedOption.getAttribute('data-mitigasi');
 
-            if(mitigasi && this.value !== 'other' && this.value !== '') {
+            if (mitigasi && this.value !== 'other' && this.value !== '') {
                 mitigationContainer.classList.remove('hidden');
                 mitigationText.textContent = mitigasi;
             } else {

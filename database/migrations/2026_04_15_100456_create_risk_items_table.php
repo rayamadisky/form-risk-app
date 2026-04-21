@@ -9,15 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-    Schema::create('risk_items', function (Blueprint $table) {
-        $table->id();
-        $table->string('nama_risiko'); // Contoh: Selisih kurang kas besar
-        $table->enum('kategori', ['finansial', 'non_finansial']);
-        $table->string('role_target'); // Contoh: teller, cs, security
-        $table->timestamps();
-    });
+        Schema::create('risk_items', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama_risiko');
+            // TAMBAHIN BARIS INI:
+            $table->enum('kategori', ['finansial', 'non-finansial'])->default('finansial');
+            $table->string('role_target');
+            $table->timestamps();
+        });
     }
 
     /**

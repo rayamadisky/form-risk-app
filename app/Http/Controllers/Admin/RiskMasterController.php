@@ -22,6 +22,7 @@ class RiskMasterController extends Controller
     {
         $request->validate([
             'nama_risiko' => 'required|string|max:255',
+            'kategori' => 'required|in:finansial,non-finansial', // TAMBAHAN INI
             'role_target' => 'required|in:teller,ca,csr,security,kacab,korwil',
         ]);
 

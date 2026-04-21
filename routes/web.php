@@ -27,7 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // --- MENU 1: INPUT LAPORAN (MAKER) ---
-    Route::get('/form-risiko', [RiskReportController::class, 'create'])->name('form.risiko');
+    Route::get('/form-risiko/{kategori}', [RiskReportController::class, 'create'])->name('form.risiko');
     Route::post('/form-risiko', [RiskReportController::class, 'store'])->name('form.risiko.store');
 
     // --- MENU 2: REVIEW & TINDAK LANJUT (CHECKER: KACAB & KORWIL) ---

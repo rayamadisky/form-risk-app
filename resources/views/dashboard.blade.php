@@ -7,7 +7,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-8 border-l-4 border-indigo-500">
                 <div class="p-6 text-gray-900">
                     <h3 class="text-2xl font-extrabold text-gray-800">Selamat Datang, {{ Auth::user()->name }}!</h3>
@@ -21,10 +21,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 @hasanyrole('teller|ca|csr|security|kacab')
-                <a href="{{ route('form.risiko') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-blue-50 transition border-t-4 border-t-blue-500 group">
-                    <div class="text-blue-500 mb-2 text-3xl group-hover:scale-110 transition-transform">📝</div>
-                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">Input Laporan Risiko</h5>
-                    <p class="font-normal text-gray-600 text-sm">Laporkan indikasi risiko operasional, selisih kas, atau kejadian lainnya sesuai SOP.</p>
+                <a href="{{ route('form.risiko', 'finansial') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-red-50 transition border-t-4 border-t-red-500 group">
+                    <div class="text-red-500 mb-2 text-3xl group-hover:scale-110 transition-transform">💸</div>
+                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">Risiko Finansial (Loss Event)</h5>
+                    <p class="font-normal text-gray-600 text-sm">Laporkan selisih kas, salah input nominal, salah hitung margin, atau kejadian yang berdampak langsung pada kerugian uang.</p>
+                </a>
+
+                <a href="{{ route('form.risiko', 'non-finansial') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-orange-50 transition border-t-4 border-t-orange-500 group">
+                    <div class="text-orange-500 mb-2 text-3xl group-hover:scale-110 transition-transform">⚠️</div>
+                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">Risiko Non-Finansial (Risk Event)</h5>
+                    <p class="font-normal text-gray-600 text-sm">Laporkan komplain nasabah, sistem/jaringan down, pelanggaran SOP, atau potensi risiko operasional lainnya.</p>
                 </a>
                 @endhasanyrole
 

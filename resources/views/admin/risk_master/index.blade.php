@@ -12,10 +12,6 @@
                 <h3 class="text-lg font-bold mb-4 text-gray-900">Tambah Pertanyaan Risiko Baru</h3>
                 <form action="{{ route('admin.risk_master.store_item') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     @csrf
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700">Nama Risiko (Pertanyaan)</label>
-                        <input type="text" name="nama_risiko" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Contoh: Selisih kurang pada perhitungan kas">
-                    </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Target Jabatan (Role)</label>
                         <select name="role_target" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm uppercase">
@@ -25,6 +21,17 @@
                             <option value="korwil">Korwil</option>
                             <option value="security">Security</option>
                             <option value="csr">CSR</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Nama Risiko (Pertanyaan)</label>
+                        <input type="text" name="nama_risiko" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Contoh: Selisih kurang pada perhitungan kas">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Kategori Risiko</label>
+                        <select name="kategori" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm uppercase">
+                            <option value="finansial">Finansial (Loss Event)</option>
+                            <option value="non-finansial">Non-Finansial (Risk Event)</option>
                         </select>
                     </div>
                     <div class="md:col-span-3 text-right">
