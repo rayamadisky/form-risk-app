@@ -438,6 +438,103 @@ class RiskMasterSeeder extends Seeder
                 'role_target' => 'csr',
                 'causes' => [] 
             ],
+            // ==========================================
+            // SOAL FINANSIAL UNTUK SECURITY
+            // ==========================================
+            [
+                'nama_risiko' => 'Tidak melakukan pengawalan ketika melakukan replenish ATM/CRM',
+                'kategori' => 'finansial',
+                'role_target' => 'security',
+                'causes' => [
+                    'Kurang pemahaman / penguasaan akan produk / prosedur / kebijakan bank',
+                    'Kurangnya komunikasi, koordinasi dan kerja sama di unit kerja',
+                    'Banyaknya volume / beban kerja'
+                ]
+            ],
+            [
+                'nama_risiko' => 'Adanya pencurian / perampokan uang tunai',
+                'kategori' => 'finansial',
+                'role_target' => 'security',
+                'causes' => [
+                    'Aktivitas kriminal eksternal',
+                    'Itikad buruk karyawan'
+                ]
+            ],
+            [
+                'nama_risiko' => 'Adanya skimming di ATM / CRM',
+                'kategori' => 'finansial',
+                'role_target' => 'security',
+                'causes' => [
+                    'Aktivitas kriminal eksternal',
+                    'Itikad buruk karyawan',
+                    'Lemahnya pengawasan dan kontrol karyawan'
+                ]
+            ],
+            [
+                'nama_risiko' => 'Tidak melakukan pengamanan sesuai dengan ketentuan',
+                'kategori' => 'finansial',
+                'role_target' => 'security',
+                'causes' => [
+                    'Tidak patuh terhadap prosedur / kebijakan',
+                    'Kurang pemahaman / penguasaan akan produk / prosedur / kebijakan bank',
+                    'Kurangnya komunikasi, koordinasi dan kerja sama di unit kerja'
+                ]
+            ],
+            [
+                'nama_risiko' => 'Potensi risiko kerugian finansial lainnya',
+                'kategori' => 'finansial',
+                'role_target' => 'security',
+                'causes' => [] 
+            ],
+
+            // ==========================================
+            // SOAL NON-FINANSIAL UNTUK SECURITY
+            // ==========================================
+            [
+                'nama_risiko' => 'Adanya keluhan nasabah mengenai pelayanan',
+                'kategori' => 'non-finansial',
+                'role_target' => 'security',
+                'causes' => [
+                    'Kurangnya komunikasi, koordinasi dan kerja sama di unit kerja',
+                    'Banyaknya volume / beban kerja',
+                    'Tidak terampil dan cekatan',
+                    'Peralatan pendukung operasional rusak / tidak memadai',
+                    'Kurang pemahaman / penguasaan akan produk / prosedur / kebijakan bank'
+                ]
+            ],
+            [
+                'nama_risiko' => 'Sering meninggalkan tempat kerja pada saat jam kantor',
+                'kategori' => 'non-finansial',
+                'role_target' => 'security',
+                'causes' => [
+                    'Lemahnya pengawasan dan kontrol atasan',
+                    'Tidak ada motivasi, tidak bersemangat kerja'
+                ]
+            ],
+            [
+                'nama_risiko' => 'Meningkatnya keluhan nasabah mengenai sikap kurang ramah',
+                'kategori' => 'non-finansial',
+                'role_target' => 'security',
+                'causes' => [
+                    'Banyaknya volume / beban kerja',
+                    'Tidak ada motivasi, tidak bersemangat kerja'
+                ]
+            ],
+            [
+                'nama_risiko' => 'Meningkatnya keluhan nasabah mengenai ketidakpahaman produk',
+                'kategori' => 'non-finansial',
+                'role_target' => 'security',
+                'causes' => [
+                    'Lemahnya pengawasan dan kontrol atasan',
+                    'Kurang pemahaman / penguasaan akan produk / prosedur / kebijakan bank'
+                ]
+            ],
+            [
+                'nama_risiko' => 'Potensi risiko kerugian non finansial lainnya',
+                'kategori' => 'non-finansial',
+                'role_target' => 'security',
+                'causes' => [] 
+            ]
         ];
 
         // 3. EKSEKUSI PENYUNTIKAN

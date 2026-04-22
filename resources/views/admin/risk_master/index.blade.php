@@ -65,12 +65,24 @@
                                 <div class="bg-gray-50 rounded-lg p-3 space-y-3">
                                     <h4 class="text-xs font-bold text-gray-500 uppercase">Daftar Penyebab & Mitigasi:</h4>
                                     @foreach($item->causes as $cause)
-                                    <div class="text-xs border-l-2 border-blue-300 pl-3">
-                                        <p class="font-semibold text-gray-700 italic">"{{ $cause->penyebab }}"</p>
-                                        @foreach($cause->mitigations as $mitigation)
-                                        <p class="text-green-600 mt-1">→ Mitigasi: {{ $mitigation->mitigasi }}</p>
-                                        @endforeach
-                                    </div>
+                                        @php $mitigasiTeks = $cause->mitigations->first()->mitigasi ?? ''; @endphp
+                                        
+                                        <div class="text-xs border-l-2 border-blue-300 pl-3 relative group py-1">
+                                            <p class="font-semibold text-gray-700 italic pr-10">"{{ $cause->penyebab }}"</p>
+                                            
+                                            @if($mitigasiTeks)
+                                                <p class="text-green-600 mt-1 pr-10">→ Mitigasi: {{ $mitigasiTeks }}</p>
+                                            @endif
+
+                                            <button type="button" 
+                                                data-id="{{ $cause->id }}" 
+                                                data-penyebab="{{ $cause->penyebab }}" 
+                                                data-mitigasi="{{ $mitigasiTeks }}" 
+                                                onclick="openEditCauseModal(this)" 
+                                                class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 bg-yellow-100 text-yellow-700 hover:bg-yellow-200 hover:text-yellow-900 border border-yellow-300 font-bold px-2 py-0.5 rounded text-[10px] transition uppercase tracking-wider">
+                                                Edit
+                                            </button>
+                                        </div>
                                     @endforeach
 
                                     <form action="{{ route('admin.risk_master.store_cause', $item->id) }}" method="POST" class="mt-2 pt-2 border-t border-gray-200 flex gap-2">
@@ -102,4 +114,51 @@
 
         </div>
     </div>
+    <div id="modalEditCause" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-32 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white border-t-4 border-t-yellow-500">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-lg font-bold text-gray-900 uppercase">Edit Penyebab & Mitigasi</h3>
+                <button onclick="document.getElementById('modalEditCause').classList.add('hidden')" class="text-gray-400 hover:text-red-500 font-bold text-xl">&times;</button>
+            </div>
+            
+            <form id="editCauseForm" method="POST" class="space-y-4">
+                @csrf
+                @method('PATCH')
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Teks Penyebab <span class="text-red-500">*</span></label>
+                    <input type="text" name="penyebab" id="edit_penyebab_input" required class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-yellow-500 focus:border-yellow-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Teks Mitigasi <span class="text-gray-400 font-normal">(Kosongkan jika ingin dihapus)</span></label>
+                    <input type="text" name="mitigasi" id="edit_mitigasi_input" class="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-yellow-500 focus:border-yellow-500">
+                </div>
+                
+                <div class="mt-6 flex justify-end gap-2 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="document.getElementById('modalEditCause').classList.add('hidden')" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded text-sm">Batal</button>
+                    <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded text-sm shadow">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditCauseModal(button) {
+            // Tarik data dari atribut tombol
+            const id = button.getAttribute('data-id');
+            const penyebab = button.getAttribute('data-penyebab');
+            const mitigasi = button.getAttribute('data-mitigasi');
+
+            // Isi nilai ke form modal
+            document.getElementById('edit_penyebab_input').value = penyebab;
+            document.getElementById('edit_mitigasi_input').value = mitigasi;
+
+            // Update URL Action Form
+            document.getElementById('editCauseForm').action = `/admin/risk-master/cause/${id}`;
+
+            // Tampilkan Modal
+            document.getElementById('modalEditCause').classList.remove('hidden');
+        }
+    </script>
 </x-app-layout>

@@ -59,4 +59,32 @@ class RiskMasterController extends Controller
         RiskItem::findOrFail($id)->delete();
         return back()->with('success', 'Pertanyaan berhasil dihapus dari sistem.');
     }
+
+    // FUNGSI UPDATE PENYEBAB & MITIGASI (INLINE)
+    public function updateCause(Request $request, $id)
+    {
+        $request->validate([
+            'penyebab' => 'required|string|max:255',
+            'mitigasi' => 'nullable|string|max:255'
+        ]);
+
+        // 1. Cari dan Update Penyebab
+        $cause = \App\Models\RiskCause::findOrFail($id);
+        $cause->update(['penyebab' => $request->penyebab]);
+
+        // 2. Eksekusi Mitigasi (Update, Create, atau Delete)
+        if ($request->filled('mitigasi')) {
+            $mitigation = $cause->mitigations()->first();
+            if ($mitigation) {
+                $mitigation->update(['mitigasi' => $request->mitigasi]);
+            } else {
+                $cause->mitigations()->create(['mitigasi' => $request->mitigasi]);
+            }
+        } else {
+            // Kalau form mitigasi dikosongin, hapus data mitigasi yang nempel
+            $cause->mitigations()->delete();
+        }
+
+        return back()->with('success', 'Data Penyebab & Mitigasi berhasil diperbarui!');
+    }
 }

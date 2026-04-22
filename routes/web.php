@@ -62,6 +62,9 @@ Route::middleware(['auth', 'role:manrisk'])->group(function () {
     // CRUD User Management
     Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store');
     Route::patch('/admin/users/{user}', [AdminUserController::class, 'update'])->name('admin.users.update');
+
+    // Rute buat update penyebab & mitigasi
+    Route::patch('/admin/risk-master/cause/{id}', [\App\Http\Controllers\Admin\RiskMasterController::class, 'updateCause'])->name('admin.risk_master.update_cause');
 });
 
 require __DIR__ . '/auth.php';
