@@ -118,7 +118,6 @@
                                 $resColors = [
                                 'open' => 'bg-gray-100 text-gray-800',
                                 'in_progress' => 'bg-blue-100 text-blue-800',
-                                'monitoring' => 'bg-yellow-100 text-yellow-800',
                                 'closed' => 'bg-green-100 text-green-800',
                                 ];
                                 $resClass = $resColors[$report->resolution_status] ?? 'bg-gray-100 text-gray-800';
@@ -137,12 +136,10 @@
                                     <textarea name="note" rows="3" required class="w-full rounded-md border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 mb-2" placeholder="Ketik tindakan penyelesaian di sini..."></textarea>
 
                                     <label class="block text-xs font-bold text-blue-800 uppercase mb-1">Set Status Menjadi:</label>
-                                    <select name="new_status" class="w-full rounded-md border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 mb-3">
+                                    <select name="new_status" class="style: margin-bottom: 1rem; w-full rounded-md border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 mb-4" required>
                                         <option value="in_progress" {{ $report->resolution_status == 'in_progress' ? 'selected' : '' }}>In Progress (Sedang dikerjakan)</option>
-                                        <option value="monitoring" {{ $report->resolution_status == 'monitoring' ? 'selected' : '' }}>Monitoring (Dalam Pantauan)</option>
-
-                                        @if(auth()->user()->hasAnyRole(['kacab', 'korwil', 'manrisk']))
-                                        <option value="closed" class="font-bold text-green-600">Closed (Selesai Tuntas)</option>
+                                        @if(auth()->user()->hasAnyRole(['kacab', 'korwil']))
+                                            <option value="closed" class="font-bold text-green-600">Closed (Selesai Tuntas)</option>
                                         @endif
                                     </select>
 

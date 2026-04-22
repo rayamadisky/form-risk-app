@@ -21,25 +21,25 @@
                         <thead class="bg-gray-100">
                             <tr>
                                 <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase">Tgl (Lapor/Kejadian/Diket)</th>
-                                <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase">Pelapor</th>
-                                <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase">Kategori</th>
+                                <th class="py-3 px-4 border-b text-center text-xs font-semibold text-gray-700 uppercase">Pelapor</th>
+                                <th class="py-3 px-4 border-b text-center text-xs font-semibold text-gray-700 uppercase">Kategori</th>
                                 <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase w-1/3">Risiko, Penyebab & Mitigasi</th>
                                 <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase">Dampak</th>
-                                <th class="py-3 px-4 border-b text-right text-xs font-semibold text-gray-700 uppercase">Aksi</th>
+                                <th class="py-3 px-4 border-b text-center text-xs font-semibold text-gray-700 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($reports as $report)
-                            <tr class="hover:bg-gray-50 align-top">
+                            <tr class="hover:bg-gray-50 align-middle">
                                 <td class="py-3 px-4 border-b whitespace-nowrap">
                                     <div class="text-xs font-bold text-blue-700">Lapor: {{ $report->created_at->format('d-m-Y') }}</div>
                                     <div class="text-xs text-gray-600 mt-1">Kejadian: {{ \Carbon\Carbon::parse($report->tanggal_kejadian)->format('d-m-Y') }}</div>
                                     <div class="text-xs text-gray-600">Diketahui: {{ \Carbon\Carbon::parse($report->tanggal_diketahui)->format('d-m-Y') }}</div>
                                 </td>
 
-                                <td class="py-3 px-4 border-b text-sm font-bold">{{ $report->user->name }}</td>
+                                <td class="py-3 px-4 border-b text-sm font-bold align-middle text-center">{{ $report->user->name }}</td>
 
-                                <td class="py-3 px-4 border-b">
+                                <td class="py-3 px-4 border-b align-middle text-center">
                                     @if($report->kategori === 'finansial')
                                     <span class="px-2 py-1 bg-red-100 text-red-800 rounded font-bold text-[10px] uppercase border border-red-200">Finansial</span>
                                     @else
@@ -74,7 +74,7 @@
                                     </div>
                                 </td>
 
-                                <td class="py-3 px-4 border-b text-sm text-gray-800">
+                                <td class="py-3 px-4 border-b text-sm text-gray-800 align-middle">
                                     @if($report->kategori === 'finansial')
                                     <span class="font-bold">Rp {{ number_format($report->dampak_finansial, 0, ',', '.') }}</span>
                                     @else
@@ -82,8 +82,8 @@
                                     @endif
                                 </td>
 
-                                <td class="py-3 px-4 border-b text-right">
-                                    <div class="flex flex-col gap-2 items-end">
+                                <td class="py-3 px-4 border-b align-middle">
+                                    <div class="flex flex-col gap-2 items-center">
                                         <form action="{{ route('risk_reports.update_status', $report->id) }}" method="POST">
                                             @csrf
                                             <input type="hidden" name="status" value="approved">
@@ -117,21 +117,22 @@
                         <thead class="bg-gray-100">
                             <tr>
                                 <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase">Tgl (Lapor/Kejadian)</th>
-                                <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase">Kategori</th>
+                                <th class="py-3 px-4 border-b text-center text-xs font-semibold text-gray-700 uppercase">Kategori</th>
                                 <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase w-1/3">Risiko, Penyebab & Mitigasi</th>
-                                <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase">Status Tindak Lanjut</th>
-                                <th class="py-3 px-4 border-b text-right text-xs font-semibold text-gray-700 uppercase">Update Status</th>
+                                <th class="py-3 px-4 border-b text-center text-xs font-semibold text-gray-700 uppercase">Status Tindak Lanjut</th>
+                                <th class="py-3 px-4 border-b text-center text-xs font-semibold text-gray-700 uppercase">Update Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($tindakLanjut as $tl)
-                            <tr class="hover:bg-gray-50 align-top">
+                            <tr class="hover:bg-gray-50 align-middle">
                                 <td class="py-3 px-4 border-b whitespace-nowrap">
                                     <div class="text-xs font-bold text-blue-700">Lapor: {{ $tl->created_at->format('d-m-Y') }}</div>
                                     <div class="text-xs text-gray-600 mt-1">Kejadian: {{ \Carbon\Carbon::parse($tl->tanggal_kejadian)->format('d-m-Y') }}</div>
+                                    <div class="text-xs text-gray-600">Diketahui: {{ \Carbon\Carbon::parse($tl->tanggal_diketahui)->format('d-m-Y') }}</div>
                                 </td>
 
-                                <td class="py-3 px-4 border-b">
+                                <td class="py-3 px-4 border-b align-middle text-center">
                                     @if($tl->kategori === 'finansial')
                                     <span class="px-2 py-1 bg-red-100 text-red-800 rounded font-bold text-[10px] uppercase border border-red-200">Finansial</span>
                                     @else
@@ -162,20 +163,19 @@
                                     </div>
                                 </td>
 
-                                <td class="py-3 px-4 border-b text-sm">
-                                    <span class="px-2 py-1 {{ $tl->resolution_status == 'monitoring' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800' }} rounded font-bold text-xs uppercase border {{ $tl->resolution_status == 'monitoring' ? 'border-yellow-300' : 'border-blue-300' }}">
+                                <td class="py-3 px-4 border-b text-sm align-middle text-center">
+                                    <span class="px-2 py-1 {{ $tl->resolution_status == 'open,in_progress' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800' }} rounded font-bold text-xs uppercase border">
                                         {{ $tl->resolution_status }}
                                     </span>
                                 </td>
 
-                                <td class="py-3 px-4 border-b text-right">
+                                <td class="py-3 px-4 border-b text-right align-middle">
                                     <form action="{{ route('risk_reports.update_resolution', $tl->id) }}" method="POST" class="flex flex-col items-end gap-2">
                                         @csrf
-                                        <select name="resolution_status" class="text-xs border-gray-300 rounded-md py-1 w-32">
-                                            <option value="monitoring" {{ $tl->resolution_status == 'monitoring' ? 'selected' : '' }}>Masih Monitoring</option>
+                                        <select name="resolution_status" class="text-xs border-gray-300 rounded-md py-1 w-full">
                                             <option value="closed">Selesai (Closed)</option>
                                         </select>
-                                        <button type="submit" class="w-32 bg-blue-600 hover:bg-blue-800 text-white font-bold py-1 px-3 rounded text-xs">Simpan Status</button>
+                                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-800 text-white font-bold py-1 px-3 rounded text-xs">Simpan Status</button>
                                     </form>
                                 </td>
                             </tr>

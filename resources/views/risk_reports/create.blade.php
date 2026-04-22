@@ -132,7 +132,6 @@
                             <select name="status_awal" required class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 <option value="open">Open (Belum ada tindakan sama sekali)</option>
                                 <option value="in_progress">In Progress (Sedang dalam proses penyelesaian)</option>
-                                <option value="monitoring">Monitoring (Selesai, tapi butuh dipantau)</option>
                             </select>
                         </div>
                     </div>

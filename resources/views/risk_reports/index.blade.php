@@ -26,7 +26,6 @@
                             <option value="">Semua Status</option>
                             <option value="open" {{ request('resolution_status') == 'open' ? 'selected' : '' }}>Open (Baru)</option>
                             <option value="in_progress" {{ request('resolution_status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                            <option value="monitoring" {{ request('resolution_status') == 'monitoring' ? 'selected' : '' }}>Monitoring</option>
                             <option value="closed" {{ request('resolution_status') == 'closed' ? 'selected' : '' }}>Closed (Selesai)</option>
                         </select>
                     </div>
@@ -72,7 +71,6 @@
                             <option value="">Semua Status</option>
                             <option value="open" {{ request('resolution_status') == 'open' ? 'selected' : '' }}>Open</option>
                             <option value="in_progress" {{ request('resolution_status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                            <option value="monitoring" {{ request('resolution_status') == 'monitoring' ? 'selected' : '' }}>Monitoring</option>
                             <option value="closed" {{ request('resolution_status') == 'closed' ? 'selected' : '' }}>Closed</option>
                         </select>
                     </div>
@@ -119,14 +117,14 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider">Tgl Lapor & Ketahui</th>
-                                <th class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider">Cabang</th>
-                                <th class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider">Maker</th>
-                                <th class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider">Risiko, Penyebab & Mitigasi</th>
-                                <th class="px-6 py-3 text-right text-xs font-extrabold text-gray-500 uppercase tracking-wider">Dampak</th>
-                                <th class="px-6 py-3 text-center">Status Approval</th>
-                                <th class="px-6 py-3 text-center">Tindak Lanjut</th>
-                                <th class="px-6 py-3 text-center">Aksi</th>
+                                <th class="px-6 py-3 text-center text-xs font-extrabold text-gray-500 uppercase tracking-wider">Tgl Lapor & Ketahui</th>
+                                <th class="px-6 py-3 text-center text-xs font-extrabold text-gray-500 uppercase tracking-wider">Cabang</th>
+                                <th class="px-6 py-3 text-center text-xs font-extrabold text-gray-500 uppercase tracking-wider">Maker</th>
+                                <th class="px-6 py-3 text-center text-xs font-extrabold text-gray-500 uppercase tracking-wider">Risiko, Penyebab & Mitigasi</th>
+                                <th class="px-6 py-3 text-center text-xs font-extrabold text-gray-500 uppercase tracking-wider">Dampak</th>
+                                <th class="px-6 py-3 text-center text-xs font-extrabold text-gray-500 uppercase tracking-wider whitespace-nowrap">Status Approval</th>
+                                <th class="px-6 py-3 text-center text-xs font-extrabold text-gray-500 uppercase tracking-wider whitespace-nowrap">Tindak Lanjut</th>
+                                <th class="px-6 py-3 text-center text-xs font-extrabold text-gray-500 uppercase tracking-wider whitespace-nowrap">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -158,11 +156,11 @@
                                     @endif
                                 </td>
 
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-semibold uppercase">
+                                <td class="px-6 py-4 text-sm text-gray-800 font-semibold">
                                     {{ $report->branch->nama_cabang ?? 'HQ' }}
                                 </td>
 
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-bold">
+                                <td class="px-6 py-4 text-sm text-gray-800 font-bold">
                                     {{ $report->user->name }}
                                 </td>
 
@@ -201,9 +199,9 @@
 
                                 <td class="py-3 px-4 border-b text-sm text-gray-800">
                                     @if($report->kategori === 'finansial')
-                                    <span class="font-bold">Rp {{ number_format($report->dampak_finansial, 0, ',', '.') }}</span>
+                                    <span class="text-center font-bold">Rp {{ number_format($report->dampak_finansial, 0, ',', '.') }}</span>
                                     @else
-                                    <span class="text-xs italic">{{ $report->dampak_non_finansial }}</span>
+                                    <span class="text-center text-xs italic">{{ $report->dampak_non_finansial }}</span>
                                     @endif
                                 </td>
 
@@ -222,7 +220,6 @@
                                     $resColors = [
                                     'open' => 'bg-gray-100 text-gray-600 border-gray-200',
                                     'in_progress' => 'bg-blue-100 text-blue-700 border-blue-200',
-                                    'monitoring' => 'bg-orange-100 text-orange-700 border-orange-200',
                                     'closed' => 'bg-gray-800 text-white border-gray-900',
                                     ];
                                     $resClass = $resColors[$report->resolution_status] ?? $resColors['open'];

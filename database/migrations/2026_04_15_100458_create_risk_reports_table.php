@@ -41,7 +41,7 @@ return new class extends Migration
 
             // TAMBAHIN DUA BARIS INI:
             $table->string('approval_status')->default('pending_kacab');
-            $table->enum('resolution_status', ['open', 'in_progress', 'monitoring', 'closed'])->default('open');
+            $table->enum('resolution_status', ['open', 'in_progress', 'closed'])->default('open');
 
 
             $table->timestamps();

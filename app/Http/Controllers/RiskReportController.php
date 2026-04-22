@@ -49,7 +49,7 @@ class RiskReportController extends Controller
             $rules['dampak_non_finansial'] = 'required|string';
         }
         $rules['tindakan_awal'] = 'nullable|string';
-        $rules['status_awal'] = 'required|in:open,in_progress,monitoring';
+        $rules['status_awal'] = 'required|in:open,in_progress';
 
         // Cukup panggil validasi SATU KALI aja
         $request->validate($rules);
@@ -95,30 +95,43 @@ class RiskReportController extends Controller
         $user = Auth::user();
         $role = $user->roles->first()->name;
 
-        // TAMBAHIN 'cause.mitigations' DI SINI BIAR NGGAK LEMOT
-        $query = RiskReport::with(['user', 'item', 'cause.mitigations']);
+        $reports = collect();
+        $tindakLanjut = collect();
 
         if ($role === 'kacab') {
-            $reports = $query->where('branch_id', $user->branch_id)
+            // 1. Tabel Persetujuan (Menunggu Approval Kacab)
+            $reports = RiskReport::with(['user', 'item', 'cause.mitigations'])
+                ->where('branch_id', $user->branch_id)
                 ->where('approval_status', 'pending_kacab')
                 ->get();
 
-            $tindakLanjut = RiskReport::with(['user', 'item', 'cause.mitigations']) // Tarik mitigasi juga di sini
+            // 2. Tabel Tindak Lanjut (Kacab wajib pantau SEMUA laporan di cabangnya)
+            $tindakLanjut = RiskReport::with(['user', 'item', 'cause.mitigations'])
                 ->where('branch_id', $user->branch_id)
                 ->where('approval_status', 'approved')
-                ->whereIn('resolution_status', ['open', 'monitoring'])
+                ->whereIn('resolution_status', ['open', 'in_progress'])
+                ->orderBy('updated_at', 'desc')
                 ->get();
+
         } elseif ($role === 'korwil') {
             $branchIds = \App\Models\Branch::where('korwil_id', $user->id)->pluck('id');
 
-            $reports = $query->whereIn('branch_id', $branchIds)
+            // 1. Tabel Persetujuan (Menunggu Approval Korwil)
+            $reports = RiskReport::with(['user', 'item', 'cause.mitigations'])
+                ->whereIn('branch_id', $branchIds)
                 ->where('approval_status', 'pending_korwil')
                 ->get();
 
-            $tindakLanjut = RiskReport::with(['user', 'item', 'cause.mitigations']) // Tarik mitigasi juga di sini
+            // 2. Tabel Tindak Lanjut (Korwil HANYA pantau laporan milik Kacab)
+            $tindakLanjut = RiskReport::with(['user', 'item', 'cause.mitigations'])
                 ->whereIn('branch_id', $branchIds)
                 ->where('approval_status', 'approved')
-                ->whereIn('resolution_status', ['open', 'monitoring'])
+                ->whereIn('resolution_status', ['open', 'in_progress'])
+                // INI GEMBOK SAKTINYA: Filter berdasarkan role_target di tabel master
+                ->whereHas('item', function($q) {
+                    $q->where('role_target', 'kacab');
+                })
+                ->orderBy('updated_at', 'desc')
                 ->get();
         }
 
@@ -229,16 +242,22 @@ class RiskReportController extends Controller
     // FUNGSI TAMBAHAN: CATAT PROGRESS TINDAK LANJUT (NOTE + STATUS)
     public function addProgress(Request $request, $id)
     {
+        $user = Auth::user();
+
+        // GEMBOK BACK-END: ManRisk dilarang keras eksekusi fungsi ini
+        if ($user->hasRole('manrisk')) {
+            return back()->with('error', 'Akses Ditolak! Divisi ManRisk hanya berwenang memantau, bukan mengubah progress penanganan.');
+        }
         $request->validate([
             'note' => 'required|string|min:5',
-            'new_status' => 'required|in:in_progress,monitoring,closed'
+            'new_status' => 'required|in:in_progress,closed'
         ]);
 
         $report = RiskReport::findOrFail($id);
         $user = Auth::user();
 
         // VALIDASI OTORITAS: Cuma Kacab/Korwil yang bisa ngetok status 'closed'
-        if ($request->new_status === 'closed' && !$user->hasAnyRole(['kacab', 'korwil', 'manrisk'])) {
+        if ($request->new_status === 'closed' && !$user->hasAnyRole(['kacab', 'korwil'])) {
             return back()->with('error', 'Hanya Atasan yang bisa menutup (Closed) laporan ini.');
         }
 
