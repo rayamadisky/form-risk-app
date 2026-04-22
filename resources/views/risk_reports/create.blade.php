@@ -116,6 +116,27 @@
                     </div>
                     @endif
 
+                    <div class="mt-8 border-b pb-2 mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">4. Penanganan Awal & Status</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-bold text-gray-700">Tindakan Penanganan Awal (Opsional)</label>
+                            <p class="text-xs text-gray-500 mb-1">Jika masalah sudah langsung ditangani saat kejadian, ceritakan di sini.</p>
+                            <textarea name="tindakan_awal" rows="2" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Contoh: Selisih kas sudah langsung diganti sore itu juga / Nasabah sudah ditelepon untuk TT ulang..."></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700">Status Penyelesaian Saat Ini <span class="text-red-500">*</span></label>
+                            <select name="status_awal" required class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="open">Open (Belum ada tindakan sama sekali)</option>
+                                <option value="in_progress">In Progress (Sedang dalam proses penyelesaian)</option>
+                                <option value="monitoring">Monitoring (Selesai, tapi butuh dipantau)</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="flex justify-end">
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-black font-bold py-2 px-6 rounded">
                             Submit Laporan

@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class RiskReportLog extends Model
+{
+    use HasFactory;
+
+    // Bebasin batasan kolom biar gampang insert data nanti
+    protected $guarded = [];
+
+    protected $fillable = ['risk_report_id', 'user_id', 'note', 'status_after_note'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}

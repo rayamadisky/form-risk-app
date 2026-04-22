@@ -20,7 +20,7 @@ Route::get('/dashboard', function () {
 // Semua rute di sini udah dibungkus 1 gembok auth biar nggak numpuk
 // =========================================================================
 Route::middleware('auth')->group(function () {
-    
+
     // --- Profile Bawaan Laravel Breeze ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -32,15 +32,21 @@ Route::middleware('auth')->group(function () {
 
     // --- MENU 2: REVIEW & TINDAK LANJUT (CHECKER: KACAB & KORWIL) ---
     Route::get('/review-laporan', [RiskReportController::class, 'review'])->name('review.laporan');
-    
+
     // Ini perbaikan rute persetujuan (Approve/Reject)
     Route::post('/risk-reports/{id}/status', [RiskReportController::class, 'updateStatus'])->name('risk_reports.update_status');
-    
+
     // Ini rute baru buat Tindak Lanjut (Monitoring/Closed)
     Route::post('/risk-reports/{id}/resolution', [RiskReportController::class, 'updateResolution'])->name('risk_reports.update_resolution');
 
     // --- MENU 3: RIWAYAT KESELURUHAN ---
     Route::get('/riwayat-risiko', [RiskReportController::class, 'index'])->name('risk.history');
+
+    // Rute Detail & Progress Laporan
+    Route::get('/risk-report/{id}', [RiskReportController::class, 'show'])->name('risk_reports.show');
+
+    // Rute untuk nambahin Progress Catatan (Action POST dari halaman show)
+    Route::post('/risk-report/{id}/progress', [RiskReportController::class, 'addProgress'])->name('risk_reports.add_progress');
 });
 
 
@@ -58,7 +64,7 @@ Route::middleware(['auth', 'role:manrisk'])->group(function () {
     Route::delete('/admin/risk-master/item/{id}', [RiskMasterController::class, 'destroyItem'])->name('admin.risk_master.destroy_item');
 
     // ... rute manrisk yang lain ...
-    
+
     // CRUD User Management
     Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store');
     Route::patch('/admin/users/{user}', [AdminUserController::class, 'update'])->name('admin.users.update');

@@ -48,17 +48,20 @@ class RiskReportController extends Controller
         else {
             $rules['dampak_non_finansial'] = 'required|string';
         }
+        $rules['tindakan_awal'] = 'nullable|string';
+        $rules['status_awal'] = 'required|in:open,in_progress,monitoring';
 
+        // Cukup panggil validasi SATU KALI aja
         $request->validate($rules);
 
         $user = Auth::user();
         $targetApproval = $user->hasRole('kacab') ? 'pending_korwil' : 'pending_kacab';
 
-        // 2. Simpan ke database
-        RiskReport::create([
+        // 2. Simpan ke database (TANGKAP HASILNYA KE DALAM VARIABEL $report)
+        $report = RiskReport::create([
             'user_id' => $user->id,
             'branch_id' => $user->branch_id,
-            'kategori' => $request->kategori, // Ambil dari hidden form
+            'kategori' => $request->kategori,
             'tanggal_kejadian' => $request->tanggal_kejadian,
             'tanggal_diketahui' => $request->tanggal_diketahui,
             'risk_item_id' => $request->risk_item_id,
@@ -66,12 +69,21 @@ class RiskReportController extends Controller
             'risk_cause_id' => $request->risk_cause_id,
             'other_cause_description' => $request->other_cause_description,
             'mitigasi_tambahan' => $request->mitigasi_tambahan,
-            'dampak_finansial' => $request->dampak_finansial ?? 0, // Kalau kosong otomatis 0
+            'dampak_finansial' => $request->dampak_finansial ?? 0,
             'dampak_non_finansial' => $request->dampak_non_finansial,
             'skala_dampak' => $request->skala_dampak,
             'approval_status' => $targetApproval,
-            'resolution_status' => 'open',
+            'resolution_status' => $request->status_awal,
         ]);
+
+        // 3. Otomatis Bikin Log Progress Pertama (Kalau Maker ngisi tindakan awal)
+        if ($request->filled('tindakan_awal')) {
+            $report->logs()->create([
+                'user_id' => $user->id,
+                'note' => 'Penanganan Awal: ' . $request->tindakan_awal,
+                'status_after_note' => $request->status_awal
+            ]);
+        }
 
         return redirect()->route('dashboard')->with('success', 'Laporan berhasil dikirim!');
     }
@@ -127,46 +139,78 @@ class RiskReportController extends Controller
 
     // VIEW 3: RIWAYAT (HISTORY)
     // VIEW 3: RIWAYAT & MONITORING KESELURUHAN (DENGAN FILTER)
+    // VIEW 3: RIWAYAT & MONITORING KESELURUHAN (DENGAN FILTER)
     public function index(Request $request)
     {
         $user = Auth::user();
         $role = $user->roles->first()->name;
 
-        // Tambahin 'cause.mitigations' biar database narik sekalian solusi dari master data
+        // 1. Tarik Relasi Dasar
         $query = RiskReport::with(['user', 'item', 'cause.mitigations', 'branch']);
+
+        // 2. Filter Otoritas (Tembok Keamanan)
+        // ... (Kodingan relasi atasnya tetep sama)
 
         // 2. Filter Otoritas (Tembok Keamanan)
         if ($role === 'kacab') {
             $query->where('branch_id', $user->branch_id);
-            $branches = collect(); // Kacab nggak butuh milih cabang
+            $branches = collect();
         } elseif ($role === 'korwil') {
             $branchIds = \App\Models\Branch::where('korwil_id', $user->id)->pluck('id');
             $query->whereIn('branch_id', $branchIds);
-            $branches = \App\Models\Branch::whereIn('id', $branchIds)->get(); // Korwil cuma lihat cabangnya
+            $branches = \App\Models\Branch::whereIn('id', $branchIds)->get();
+        } elseif (in_array($role, ['teller', 'ca', 'csr', 'security'])) {
+            // MAKER CUMA BISA LIAT LAPORAN DIA SENDIRI
+            $query->where('user_id', $user->id);
+            $branches = collect(); // Maker nggak butuh filter dropdown cabang
         } else {
-            // ManRisk (Dewa) bisa lihat semua cabang
+            // ManRisk bisa liat semua
             $branches = \App\Models\Branch::all();
         }
 
-        // 3. Eksekusi Filter Dinamis dari Request (Form GET)
+        // ... (Sisa kodingan filter bawahnya biarin tetep sama)
 
-        // Filter Cabang (Hanya berlaku untuk ManRisk & Korwil)
+        // 3. Eksekusi Filter Dinamis (Form GET)
+
+        // A. Filter Cabang (Hanya Korwil & ManRisk)
         if ($request->filled('branch_id') && in_array($role, ['manrisk', 'korwil'])) {
             $query->where('branch_id', $request->branch_id);
         }
 
-        // Filter Rentang Waktu (Berdasarkan tanggal kejadian)
+        // B. Filter Kategori Risiko (BARU)
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+
+        // C. Filter Jabatan (BARU)
+        if ($request->filled('jabatan')) {
+            $query->whereHas('item', function ($q) use ($request) {
+                $q->where('role_target', $request->jabatan);
+            });
+        }
+
+        // D. Filter Rentang Waktu
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->whereBetween('tanggal_kejadian', [$request->start_date, $request->end_date]);
         }
 
-        // 4. Tarik Datanya
-        $reports = $query->orderBy('tanggal_kejadian', 'desc')->get();
+        // ... (Filter cabang, kategori, dll)
 
-        // 5. Hitung Metrik Dashboard
-        $totalLoss = $reports->where('approval_status', 'approved')->sum('dampak_finansial');
-        $totalKejadian = $reports->count();
-        $totalRejected = $reports->where('approval_status', 'rejected')->count();
+        // E. Filter Status Penyelesaian (BARU)
+        if ($request->filled('resolution_status')) {
+            $query->where('resolution_status', $request->resolution_status);
+        }
+
+        // ... (Filter Tanggal dan eksekusi get())
+
+        // 4. Hitung Metrik Dashboard LANGSUNG DI DATABASE (Nggak makan RAM)
+        // Kita clone query-nya biar nggak ngerusak query utama yang mau di-get()
+        $totalLoss = (clone $query)->where('approval_status', 'approved')->sum('dampak_finansial');
+        $totalKejadian = (clone $query)->count();
+        $totalRejected = (clone $query)->where('approval_status', 'rejected')->count();
+
+        // 5. Tarik Datanya
+        $reports = $query->orderBy('tanggal_kejadian', 'desc')->get();
 
         return view('risk_reports.index', compact('reports', 'totalLoss', 'totalKejadian', 'totalRejected', 'branches', 'role'));
     }
@@ -180,5 +224,42 @@ class RiskReportController extends Controller
         $report->update(['resolution_status' => $request->resolution_status]);
 
         return redirect()->back()->with('success', 'Status tindak lanjut diperbarui!');
+    }
+
+    // FUNGSI TAMBAHAN: CATAT PROGRESS TINDAK LANJUT (NOTE + STATUS)
+    public function addProgress(Request $request, $id)
+    {
+        $request->validate([
+            'note' => 'required|string|min:5',
+            'new_status' => 'required|in:in_progress,monitoring,closed'
+        ]);
+
+        $report = RiskReport::findOrFail($id);
+        $user = Auth::user();
+
+        // VALIDASI OTORITAS: Cuma Kacab/Korwil yang bisa ngetok status 'closed'
+        if ($request->new_status === 'closed' && !$user->hasAnyRole(['kacab', 'korwil', 'manrisk'])) {
+            return back()->with('error', 'Hanya Atasan yang bisa menutup (Closed) laporan ini.');
+        }
+
+        // 1. Simpan Log Catatan
+        $report->logs()->create([
+            'user_id' => $user->id,
+            'note' => $request->note,
+            'status_after_note' => $request->new_status
+        ]);
+
+        // 2. Update Status Utama Laporan
+        $report->update(['resolution_status' => $request->new_status]);
+
+        return back()->with('success', 'Progress berhasil dicatat!');
+    }
+
+    // Nampilin Detail Laporan & Timeline
+    public function show($id)
+    {
+        $report = RiskReport::with(['user', 'item', 'branch', 'cause.mitigations', 'logs.user'])->findOrFail($id);
+
+        return view('risk_reports.show', compact('report'));
     }
 }

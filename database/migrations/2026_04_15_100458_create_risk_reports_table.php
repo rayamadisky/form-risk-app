@@ -33,7 +33,7 @@ return new class extends Migration
 
             // TAMBAHIN KOLOM BARU INI:
             $table->text('dampak_non_finansial')->nullable();
-            
+
             $table->string('skala_dampak')->nullable();
 
             // TAMBAHIN KOLOM KATEGORI JUGA BIAR JELAS LAPORANNYA APA
@@ -41,7 +41,7 @@ return new class extends Migration
 
             // TAMBAHIN DUA BARIS INI:
             $table->string('approval_status')->default('pending_kacab');
-            $table->string('resolution_status')->default('open');
+            $table->enum('resolution_status', ['open', 'in_progress', 'monitoring', 'closed'])->default('open');
 
 
             $table->timestamps();

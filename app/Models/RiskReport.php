@@ -35,4 +35,7 @@ class RiskReport extends Model
     public function cause() {
         return $this->belongsTo(RiskCause::class, 'risk_cause_id');
     }
+    public function logs() {
+    return $this->hasMany(RiskReportLog::class)->latest();
+}
 }

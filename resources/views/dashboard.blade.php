@@ -32,6 +32,13 @@
                     <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">Risiko Non-Finansial (Risk Event)</h5>
                     <p class="font-normal text-gray-600 text-sm">Laporkan komplain nasabah, sistem/jaringan down, pelanggaran SOP, atau potensi risiko operasional lainnya.</p>
                 </a>
+
+
+                <a href="{{ route('risk.history') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-blue-50 transition border-t-4 border-t-blue-500 group">
+                    <div class="text-blue-500 mb-2 text-3xl group-hover:scale-110 transition-transform">🕒</div>
+                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">Riwayat & Progress Saya</h5>
+                    <p class="font-normal text-gray-600 text-sm">Lihat riwayat laporan yang pernah Anda buat dan update progress penyelesaiannya di sini.</p>
+                </a>
                 @endhasanyrole
 
                 @hasanyrole('kacab|korwil')

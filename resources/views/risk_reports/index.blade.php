@@ -8,12 +8,34 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white p-4 shadow sm:rounded-lg mb-6 border border-gray-200">
-                <form method="GET" action="{{ route('risk.history') }}" class="flex flex-col md:flex-row items-end gap-4">
+                <form method="GET" action="{{ route('risk.history') }}" class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end mb-6">
 
+                    @if(in_array($role, ['teller', 'ca', 'csr', 'security']))
+                    <div class="md:col-span-3">
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Kategori Risiko</label>
+                        <select name="kategori" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm h-[38px]">
+                            <option value="">Semua Kategori</option>
+                            <option value="finansial" {{ request('kategori') == 'finansial' ? 'selected' : '' }}>Finansial</option>
+                            <option value="non-finansial" {{ request('kategori') == 'non-finansial' ? 'selected' : '' }}>Non-Finansial</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Penyelesaian</label>
+                        <select name="resolution_status" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm h-[38px]">
+                            <option value="">Semua Status</option>
+                            <option value="open" {{ request('resolution_status') == 'open' ? 'selected' : '' }}>Open (Baru)</option>
+                            <option value="in_progress" {{ request('resolution_status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                            <option value="monitoring" {{ request('resolution_status') == 'monitoring' ? 'selected' : '' }}>Monitoring</option>
+                            <option value="closed" {{ request('resolution_status') == 'closed' ? 'selected' : '' }}>Closed (Selesai)</option>
+                        </select>
+                    </div>
+
+                    @else
                     @if(in_array($role, ['manrisk', 'korwil']))
-                    <div class="w-full md:w-1/3">
+                    <div class="md:col-span-2">
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Filter Cabang</label>
-                        <select name="branch_id" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        <select name="branch_id" id="select-cabang" class="block w-full border-gray-300 rounded-md shadow-sm text-sm">
                             <option value="">Semua Cabang (View All)</option>
                             @foreach($branches as $branch)
                             <option value="{{ $branch->id }}" {{ request('branch_id') == $branch->id ? 'selected' : '' }}>
@@ -24,23 +46,56 @@
                     </div>
                     @endif
 
-                    <div class="w-full md:w-1/4">
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Dari Tanggal</label>
-                        <input type="date" name="start_date" value="{{ request('start_date') }}" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    <div class="{{ in_array($role, ['manrisk', 'korwil']) ? 'md:col-span-1' : 'md:col-span-2' }}">
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Kategori</label>
+                        <select name="kategori" class="block w-full border-gray-300 rounded-md shadow-sm text-sm h-[38px]">
+                            <option value="">Semua</option>
+                            <option value="finansial" {{ request('kategori') == 'finansial' ? 'selected' : '' }}>Finansial</option>
+                            <option value="non-finansial" {{ request('kategori') == 'non-finansial' ? 'selected' : '' }}>Non-Finansial</option>
+                        </select>
                     </div>
 
-                    <div class="w-full md:w-1/4">
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Sampai Tanggal</label>
-                        <input type="date" name="end_date" value="{{ request('end_date') }}" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    <div class="{{ in_array($role, ['manrisk', 'korwil']) ? 'md:col-span-1' : 'md:col-span-2' }}">
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jabatan</label>
+                        <select name="jabatan" class="block w-full border-gray-300 rounded-md shadow-sm text-sm h-[38px]">
+                            <option value="">Semua</option>
+                            <option value="teller" {{ request('jabatan') == 'teller' ? 'selected' : '' }}>Teller</option>
+                            <option value="ca" {{ request('jabatan') == 'ca' ? 'selected' : '' }}>CA</option>
+                            <option value="csr" {{ request('jabatan') == 'csr' ? 'selected' : '' }}>CSR</option>
+                            <option value="security" {{ request('jabatan') == 'security' ? 'selected' : '' }}>Security</option>
+                        </select>
                     </div>
 
-                    <div class="w-full md:w-auto flex gap-2">
-                        <button type="submit" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded text-sm shadow">
-                            Filter Data
-                        </button>
-                        <a href="{{ route('risk.history') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded text-sm shadow">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Penyelesaian</label>
+                        <select name="resolution_status" class="block w-full border-gray-300 rounded-md shadow-sm text-sm h-[38px]">
+                            <option value="">Semua Status</option>
+                            <option value="open" {{ request('resolution_status') == 'open' ? 'selected' : '' }}>Open</option>
+                            <option value="in_progress" {{ request('resolution_status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                            <option value="monitoring" {{ request('resolution_status') == 'monitoring' ? 'selected' : '' }}>Monitoring</option>
+                            <option value="closed" {{ request('resolution_status') == 'closed' ? 'selected' : '' }}>Closed</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-4 flex gap-2">
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Dari Tgl</label>
+                            <input type="date" name="start_date" value="{{ request('start_date') }}" class="block w-full border-gray-300 rounded-md shadow-sm text-sm h-[38px]">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Sampai</label>
+                            <input type="date" name="end_date" value="{{ request('end_date') }}" class="block w-full border-gray-300 rounded-md shadow-sm text-sm h-[38px]">
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="{{ in_array($role, ['teller', 'ca', 'csr', 'security']) ? 'md:col-span-6 mt-4' : 'md:col-span-2 mt-0' }} flex gap-2 justify-end items-end h-[38px]">
+                        <a href="{{ route('risk.history') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded text-sm shadow transition">
                             Reset
                         </a>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded text-sm shadow transition">
+                            Filter
+                        </button>
                     </div>
                 </form>
             </div>
@@ -68,8 +123,10 @@
                                 <th class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider">Cabang</th>
                                 <th class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider">Maker</th>
                                 <th class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider">Risiko, Penyebab & Mitigasi</th>
-                                <th class="px-6 py-3 text-right text-xs font-extrabold text-gray-500 uppercase tracking-wider">Nominal (Rp)</th>
-                                <th class="px-6 py-3 text-center text-xs font-extrabold text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-right text-xs font-extrabold text-gray-500 uppercase tracking-wider">Dampak</th>
+                                <th class="px-6 py-3 text-center">Status Approval</th>
+                                <th class="px-6 py-3 text-center">Tindak Lanjut</th>
+                                <th class="px-6 py-3 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -88,8 +145,8 @@
                             <tr class="hover:bg-gray-50 transition duration-150 {{ $isLate ? 'bg-red-50' : '' }}">
 
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-bold text-gray-900" title="Waktu Input ke Sistem">Lapor: {{ $report->created_at->format('d/m/Y') }}</div>
-                                    <div class="text-xs text-gray-500 mt-1" title="Tanggal Kejadian Diketahui">Diket: {{ $tglDiketahui->format('d/m/Y') }}</div>
+                                    <div class="text-sm font-bold text-gray-900" title="Waktu Input ke Sistem">Lapor: <br> {{ $report->created_at->format('d/m/Y') }}</div>
+                                    <div class="text-xs text-gray-500 mt-1" title="Tanggal Kejadian Diketahui">Diketahui: <br>{{ $tglDiketahui->format('d/m/Y') }}</div>
 
                                     @if($isLate)
                                     <div class="mt-2 flex items-center gap-1 text-red-700 font-extrabold text-[10px] uppercase bg-red-200 px-2 py-1 rounded-sm w-max border border-red-300">
@@ -142,27 +199,43 @@
                                     </div>
                                 </td>
 
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-800">
-                                    {{ number_format($report->dampak_finansial, 0, ',', '.') }}
+                                <td class="py-3 px-4 border-b text-sm text-gray-800">
+                                    @if($report->kategori === 'finansial')
+                                    <span class="font-bold">Rp {{ number_format($report->dampak_finansial, 0, ',', '.') }}</span>
+                                    @else
+                                    <span class="text-xs italic">{{ $report->dampak_non_finansial }}</span>
+                                    @endif
                                 </td>
 
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    @if($report->approval_status === 'pending_kacab')
-                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-bold uppercase border border-yellow-300">Pending Kacab</span>
-                                    @elseif($report->approval_status === 'pending_korwil')
-                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-bold uppercase border border-blue-300">Pending Korwil</span>
+                                <td class="px-6 py-4 text-center">
+                                    @if($report->approval_status === 'approved')
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 text-[10px] font-bold uppercase rounded border border-green-200">Approved</span>
                                     @elseif($report->approval_status === 'rejected')
-                                    <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-bold uppercase border border-red-300">Rejected</span>
-                                    @elseif($report->approval_status === 'approved')
-                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-bold uppercase border border-green-300">Approved</span>
-                                    <div class="mt-2">
-                                        @if($report->resolution_status === 'closed')
-                                        <span class="px-2 py-0.5 bg-gray-200 text-gray-700 border border-gray-400 rounded text-[10px] font-bold uppercase">Selesai (Closed)</span>
-                                        @else
-                                        <span class="px-2 py-0.5 bg-orange-100 text-orange-700 border border-orange-400 rounded text-[10px] font-bold uppercase">Monitoring</span>
-                                        @endif
-                                    </div>
+                                    <span class="px-2 py-1 bg-red-100 text-red-800 text-[10px] font-bold uppercase rounded border border-red-200">Rejected</span>
+                                    @else
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-[10px] font-bold uppercase rounded border border-yellow-200">Pending {{ str_replace('pending_', '', $report->approval_status) }}</span>
                                     @endif
+                                </td>
+
+                                <td class="px-6 py-4 text-center">
+                                    @php
+                                    $resColors = [
+                                    'open' => 'bg-gray-100 text-gray-600 border-gray-200',
+                                    'in_progress' => 'bg-blue-100 text-blue-700 border-blue-200',
+                                    'monitoring' => 'bg-orange-100 text-orange-700 border-orange-200',
+                                    'closed' => 'bg-gray-800 text-white border-gray-900',
+                                    ];
+                                    $resClass = $resColors[$report->resolution_status] ?? $resColors['open'];
+                                    @endphp
+                                    <span class="px-2 py-1 text-[10px] font-bold uppercase rounded border {{ $resClass }}">
+                                        {{ str_replace('_', ' ', $report->resolution_status) }}
+                                    </span>
+                                </td>
+
+                                <td class="px-6 py-4 text-center">
+                                    <a href="{{ route('risk_reports.show', $report->id) }}" class="inline-block bg-blue-600 hover:bg-blue-800 text-white font-bold py-1.5 px-3 rounded text-[10px] uppercase tracking-wider shadow transition">
+                                        Detail & Progress
+                                    </a>
                                 </td>
                             </tr>
                             @empty
@@ -178,4 +251,35 @@
             </div>
         </div>
     </div>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#select-cabang').select2({
+                placeholder: "Ketik nama cabang...",
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
+
+    <style>
+        /* Styling biar Select2 nyatu sama form Tailwind lu */
+        .select2-container .select2-selection--single {
+            height: 38px !important;
+            border-color: #d1d5db !important;
+            border-radius: 0.375rem !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px !important;
+            font-size: 0.875rem !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+        }
+    </style>
 </x-app-layout>
