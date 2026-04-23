@@ -71,6 +71,10 @@ Route::middleware(['auth', 'role:manrisk'])->group(function () {
 
     // Rute buat update penyebab & mitigasi
     Route::patch('/admin/risk-master/cause/{id}', [\App\Http\Controllers\Admin\RiskMasterController::class, 'updateCause'])->name('admin.risk_master.update_cause');
+
+    // Rute Manajemen Master Data Cabang (Khusus ManRisk)
+    Route::get('/branches-management', [App\Http\Controllers\BranchManagementController::class, 'index'])->name('branches.index');
+    Route::put('/branches-management/{id}', [App\Http\Controllers\BranchManagementController::class, 'update'])->name('branches.update');
 });
 
 require __DIR__ . '/auth.php';

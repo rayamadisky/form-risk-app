@@ -1,0 +1,84 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-bold text-xl text-gray-800 leading-tight">
+            {{ __('Manajemen Master Data Cabang') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+            @if(session('success'))
+            <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                {{ session('success') }}
+            </div>
+            @endif
+
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+                            <tr>
+                                <th class="px-6 py-3 text-left">Nama Cabang</th>
+                                <th class="px-6 py-3 text-center">Status</th>
+                                <th class="px-6 py-3 text-left">Korwil Penanggung Jawab</th>
+                                <th class="px-6 py-3 text-right">Aksi Update</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($branches as $branch)
+                            <tr class="{{ !$branch->is_active ? 'bg-gray-50 opacity-60' : '' }} hover:bg-gray-50">
+                                <td class="px-6 py-4 font-bold text-sm text-gray-900">{{ $branch->nama_cabang }}</td>
+
+                                <td class="px-6 py-4 text-center">
+                                    @if($branch->is_active)
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 text-[10px] font-bold uppercase rounded border border-green-200">Aktif</span>
+                                    @else
+                                    <span class="px-2 py-1 bg-red-100 text-red-800 text-[10px] font-bold uppercase rounded border border-red-200">Non-Aktif</span>
+                                    @endif
+                                </td>
+
+                                <td class="px-6 py-4" colspan="2">
+                                    <form action="{{ route('branches.update', $branch->id) }}" method="POST" class="flex items-center justify-between gap-4 w-full">
+                                        @csrf
+                                        @method('PUT')
+
+                                        <select name="korwil_id" class="flex-1 text-sm rounded border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="">-- Tanpa Korwil --</option>
+                                            @foreach($listKorwil as $k)
+                                            <option value="{{ $k->id }}" {{ $branch->korwil_id == $k->id ? 'selected' : '' }}>
+                                                {{ $k->name }}
+                                            </option>
+                                            @endforeach
+                                        </select>
+
+                                        <div class="flex gap-2">
+                                            <input type="hidden" name="is_active" id="status_{{ $branch->id }}" value="{{ $branch->is_active }}">
+
+                                            @if($branch->is_active)
+                                            <button type="submit" onclick="document.getElementById('status_{{ $branch->id }}').value = '0'" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded text-xs transition">
+                                                Non-Aktifkan
+                                            </button>
+                                            @else
+                                            <button type="submit" onclick="document.getElementById('status_{{ $branch->id }}').value = '1'" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1.5 px-3 rounded text-xs transition">
+                                                Aktifkan
+                                            </button>
+                                            @endif
+
+                                            <button type="submit" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-1.5 px-4 rounded text-xs transition">
+                                                Simpan
+                                            </button>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>

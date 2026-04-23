@@ -68,6 +68,13 @@
                     <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">Manajemen Pengguna</h5>
                     <p class="font-normal text-gray-600 text-sm">Kontrol akses seluruh pegawai BPR. Atur mutasi cabang dan non-aktifkan akun yang mencurigakan.</p>
                 </a>
+                
+                <a href="{{ route('branches.index') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-red-50 transition border-t-4 border-t-red-500 group">
+                    <div class="text-red-500 mb-2 text-3xl group-hover:scale-110 transition-transform">🏦</div>
+                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">Manajemen Cabang</h5>
+                    <p class="font-normal text-gray-600 text-sm">Kelola informasi dan struktur seluruh cabang BPR. Atur pengawasan dan koordinasi antar cabang.</p>
+                </a>
+
                 @endhasrole
 
             </div>
