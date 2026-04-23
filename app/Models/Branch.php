@@ -11,6 +11,8 @@ class Branch extends Model
     use HasFactory;
 
     protected $fillable = [
+        'kode_cabang',       // <--- BARU
+        'nickname_cabang',   // <--- BARU
         'nama_cabang', // (ini nama kolom lama lu, biarin aja)
         'is_active',   // <--- TAMBAHIN INI
         'korwil_id',   // <--- TAMBAHIN INI

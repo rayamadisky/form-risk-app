@@ -14,11 +14,15 @@ class BranchManagementController extends Controller
         $branch = Branch::findOrFail($id);
 
         $request->validate([
+            'kode_cabang' => 'nullable|string|max:10|unique:branches,kode_cabang,' . $id,
+            'nickname_cabang' => 'nullable|string|max:50',
             'korwil_id' => 'nullable|exists:users,id',
             'is_active' => 'required|boolean'
         ]);
 
         $branch->update([
+            'kode_cabang' => $request->kode_cabang,
+            'nickname_cabang' => $request->nickname_cabang,
             'korwil_id' => $request->korwil_id,
             'is_active' => $request->is_active
         ]);
