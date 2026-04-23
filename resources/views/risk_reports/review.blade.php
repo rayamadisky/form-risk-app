@@ -37,7 +37,7 @@
                                     <div class="text-xs text-gray-600">Diketahui: {{ \Carbon\Carbon::parse($report->tanggal_diketahui)->format('d-m-Y') }}</div>
                                 </td>
 
-                                <td class="py-3 px-4 border-b text-sm font-bold align-middle text-center">{{ $report->user->name }}</td>
+                                <td class="py-3 px-4 border-b text-sm align-middle text-center">{{ $report->user->name }}</td>
 
                                 <td class="py-3 px-4 border-b align-middle text-center">
                                     @if($report->kategori === 'finansial')
@@ -117,6 +117,7 @@
                         <thead class="bg-gray-100">
                             <tr>
                                 <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase">Tgl (Lapor/Kejadian)</th>
+                                <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase">Pelapor</th>
                                 <th class="py-3 px-4 border-b text-center text-xs font-semibold text-gray-700 uppercase">Kategori</th>
                                 <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase w-1/3">Risiko, Penyebab & Mitigasi</th>
                                 <th class="py-3 px-4 border-b text-center text-xs font-semibold text-gray-700 uppercase">Status Tindak Lanjut</th>
@@ -131,6 +132,8 @@
                                     <div class="text-xs text-gray-600 mt-1">Kejadian: {{ \Carbon\Carbon::parse($tl->tanggal_kejadian)->format('d-m-Y') }}</div>
                                     <div class="text-xs text-gray-600">Diketahui: {{ \Carbon\Carbon::parse($tl->tanggal_diketahui)->format('d-m-Y') }}</div>
                                 </td>
+
+                                <td class="py-3 px-4 border-b text-sm align-middle text-center">{{ $tl->user->name }}</td>
 
                                 <td class="py-3 px-4 border-b align-middle text-center">
                                     @if($tl->kategori === 'finansial')
@@ -169,14 +172,37 @@
                                     </span>
                                 </td>
 
-                                <td class="py-3 px-4 border-b text-right align-middle">
-                                    <form action="{{ route('risk_reports.update_resolution', $tl->id) }}" method="POST" class="flex flex-col items-end gap-2">
-                                        @csrf
-                                        <select name="resolution_status" class="text-xs border-gray-300 rounded-md py-1 w-full">
-                                            <option value="closed">Selesai (Closed)</option>
-                                        </select>
-                                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-800 text-white font-bold py-1 px-3 rounded text-xs">Simpan Status</button>
-                                    </form>
+                                <td class="px-4 py-4 align-middle">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <form action="{{ route('risk_reports.add_progress', $tl->id) }}" method="POST" class="w-full flex flex-col items-center gap-2">
+                                            @csrf
+
+                                            <input type="hidden" name="note" value="Update status dari halaman Review">
+
+                                            @php
+                                            $userRole = auth()->user()->roles->first()->name ?? '';
+                                            $canClose = false;
+
+                                            if (in_array($userRole, ['korwil', 'manrisk'])) {
+                                            $canClose = true;
+                                            } elseif ($userRole === 'kacab' && $tl->user_id != auth()->user()->id) {
+                                            $canClose = true;
+                                            }
+                                            @endphp
+
+                                            <select name="new_status" class="w-full max-w-[150px] text-xs border-gray-300 rounded shadow-sm focus:ring-blue-500">
+                                                <option value="in_progress" {{ $tl->resolution_status == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+
+                                                @if($canClose)
+                                                <option value="closed">Selesai (Closed)</option>
+                                                @endif
+                                            </select>
+
+                                            <button type="submit" class="w-full max-w-[150px] bg-blue-600 hover:bg-blue-800 text-white font-bold py-1.5 px-3 rounded text-xs shadow transition whitespace-nowrap">
+                                                Simpan Status
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach

@@ -143,8 +143,8 @@
                             <tr class="hover:bg-gray-50 transition duration-150 {{ $isLate ? 'bg-red-50' : '' }}">
 
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-bold text-gray-900" title="Waktu Input ke Sistem">Lapor: <br> {{ $report->created_at->format('d/m/Y') }}</div>
-                                    <div class="text-xs text-gray-500 mt-1" title="Tanggal Kejadian Diketahui">Diketahui: <br>{{ $tglDiketahui->format('d/m/Y') }}</div>
+                                    <div class="text-xs font-bold text-blue-700" title="Waktu Input ke Sistem">Lapor: <br> {{ $report->created_at->format('d/m/Y') }}</div>
+                                    <div class="text-xs text-gray-600 mt-1" title="Tanggal Kejadian Diketahui">Diketahui: <br>{{ $tglDiketahui->format('d/m/Y') }}</div>
 
                                     @if($isLate)
                                     <div class="mt-2 flex items-center gap-1 text-red-700 font-extrabold text-[10px] uppercase bg-red-200 px-2 py-1 rounded-sm w-max border border-red-300">

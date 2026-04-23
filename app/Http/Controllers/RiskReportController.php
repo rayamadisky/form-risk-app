@@ -112,7 +112,6 @@ class RiskReportController extends Controller
                 ->whereIn('resolution_status', ['open', 'in_progress'])
                 ->orderBy('updated_at', 'desc')
                 ->get();
-
         } elseif ($role === 'korwil') {
             $branchIds = \App\Models\Branch::where('korwil_id', $user->id)->pluck('id');
 
@@ -128,7 +127,7 @@ class RiskReportController extends Controller
                 ->where('approval_status', 'approved')
                 ->whereIn('resolution_status', ['open', 'in_progress'])
                 // INI GEMBOK SAKTINYA: Filter berdasarkan role_target di tabel master
-                ->whereHas('item', function($q) {
+                ->whereHas('item', function ($q) {
                     $q->where('role_target', 'kacab');
                 })
                 ->orderBy('updated_at', 'desc')
@@ -243,6 +242,22 @@ class RiskReportController extends Controller
     public function addProgress(Request $request, $id)
     {
         $user = Auth::user();
+        $report = RiskReport::findOrFail($id);
+
+        // 1. Cek jika user mencoba menutup laporan (Closed)
+        // 1. Cek jika user mencoba menutup laporan (Closed)
+        if ($request->new_status === 'closed') {
+            
+            // ATURAN A: PAKE == (BUKAN ===) BIAR NGGAK KETIPU TIPE DATA
+            if ($user->hasRole('kacab') && $report->user_id == $user->id) {
+                return back()->with('error', 'Akses Ditolak! Sebagai pelapor (Maker), Anda tidak boleh menutup kasus ini sendiri. Harap hubungi Korwil.');
+            }
+
+            // Aturan B: Selain Atasan (Kacab/Korwil/ManRisk) dilarang menutup
+            if (!$user->hasAnyRole(['kacab', 'korwil', 'manrisk'])) {
+                return back()->with('error', 'Hanya Atasan yang berwenang menutup laporan.');
+            }
+        }
 
         // GEMBOK BACK-END: ManRisk dilarang keras eksekusi fungsi ini
         if ($user->hasRole('manrisk')) {

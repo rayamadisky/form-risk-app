@@ -127,7 +127,12 @@
                                 </span>
                             </div>
 
-                            @if($report->approval_status === 'approved' && $report->resolution_status !== 'closed' && !auth()->user()->hasRole('manrisk'))
+                            @php
+                                // Tarik nama role secara paksa jadi teks murni
+                                $userRole = auth()->user()->roles->first()->name ?? '';
+                            @endphp
+
+                            @if($report->approval_status === 'approved' && $report->resolution_status !== 'closed' && $userRole !== 'manrisk')
                             <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
                                 <form action="{{ route('risk_reports.add_progress', $report->id) }}" method="POST">
                                     @csrf
@@ -136,10 +141,22 @@
                                     <textarea name="note" rows="3" required class="w-full rounded-md border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 mb-2" placeholder="Ketik tindakan penyelesaian di sini..."></textarea>
 
                                     <label class="block text-xs font-bold text-blue-800 uppercase mb-1">Set Status Menjadi:</label>
-                                    <select name="new_status" class="style: margin-bottom: 1rem; w-full rounded-md border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 mb-4" required>
+                                    <select name="new_status" class="w-full rounded-md border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 mb-3">
                                         <option value="in_progress" {{ $report->resolution_status == 'in_progress' ? 'selected' : '' }}>In Progress (Sedang dikerjakan)</option>
-                                        @if(auth()->user()->hasAnyRole(['kacab', 'korwil']))
-                                            <option value="closed" class="font-bold text-green-600">Closed (Selesai Tuntas)</option>
+
+                                        @php
+                                            $canClose = false;
+                                            
+                                            // Logika IF pakai string murni untuk mematikan cache bug
+                                            if (in_array($userRole, ['korwil', 'manrisk'])) {
+                                                $canClose = true;
+                                            } elseif ($userRole === 'kacab' && $report->user_id != auth()->user()->id) {
+                                                $canClose = true;
+                                            }
+                                        @endphp
+
+                                        @if($canClose)
+                                        <option value="closed" class="font-bold text-green-600">Closed (Selesai Tuntas)</option>
                                         @endif
                                     </select>
 
