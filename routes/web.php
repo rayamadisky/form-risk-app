@@ -75,6 +75,11 @@ Route::middleware(['auth', 'role:manrisk'])->group(function () {
     // Rute Manajemen Master Data Cabang (Khusus ManRisk)
     Route::get('/branches-management', [App\Http\Controllers\BranchManagementController::class, 'index'])->name('branches.index');
     Route::put('/branches-management/{id}', [App\Http\Controllers\BranchManagementController::class, 'update'])->name('branches.update');
+    Route::post('/branches-management', [App\Http\Controllers\BranchManagementController::class, 'store'])->name('branches.store');
+
+    Route::get('/master-risiko', [App\Http\Controllers\MasterRiskController::class, 'index'])->name('master_risk.index');
+    Route::post('/master-risiko/cause/{itemId}', [App\Http\Controllers\MasterRiskController::class, 'storeCause'])->name('master_risk.store_cause');
+    Route::post('/master-risiko/mitigation/{causeId}', [App\Http\Controllers\MasterRiskController::class, 'storeMitigation'])->name('master_risk.store_mitigation');
 });
 
 require __DIR__ . '/auth.php';

@@ -16,10 +16,40 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
-
+                    <h3 class="text-sm font-bold text-blue-800 uppercase mb-4">Pendaftaran Cabang Baru</h3>
+                    <form action="{{ route('branches.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                        @csrf
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Kode Cabang</label>
+                            <input type="text" name="kode_cabang" required class="w-full text-sm rounded border-gray-300 focus:ring-blue-500" placeholder="Contoh: 001">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Nama Lengkap Cabang</label>
+                            <input type="text" name="nama_cabang" required class="w-full text-sm rounded border-gray-300 focus:ring-blue-500" placeholder="Cabang Sudirman">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Nickname</label>
+                            <input type="text" name="nickname_cabang" class="w-full text-sm rounded border-gray-300 focus:ring-blue-500" placeholder="KCP Sudirman">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Pilih Korwil</label>
+                            <select name="korwil_id" class="w-full text-sm rounded border-gray-300 focus:ring-blue-500">
+                                <option value="">-- Tanpa Korwil --</option>
+                                @foreach($listKorwil as $k)
+                                    <option value="{{ $k->id }}">{{ $k->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded text-xs transition shadow-sm">
+                                Daftarkan Cabang
+                            </button>
+                        </div>
+                    </form>
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                             <tr>
+                                <th class="px-6 py-3 text-left">Kode Cabang</th>
                                 <th class="px-6 py-3 text-left">Nama Cabang</th>
                                 <th class="px-6 py-3 text-center">Status</th>
                                 <th class="px-6 py-3 text-left">Korwil Penanggung Jawab</th>
@@ -29,6 +59,7 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($branches as $branch)
                             <tr class="{{ !$branch->is_active ? 'bg-gray-50 opacity-60' : '' }} hover:bg-gray-50">
+                                <td class="px-6 py-4 font-bold text-sm text-gray-900">{{ $branch->kode_cabang }}</td>
                                 <td class="px-6 py-4 font-bold text-sm text-gray-900">{{ $branch->nama_cabang }}</td>
 
                                 <td class="px-6 py-4 text-center">

@@ -40,4 +40,24 @@ class BranchManagementController extends Controller
 
         return view('branches.index', compact('branches', 'listKorwil'));
     }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'kode_cabang' => 'required|string|max:10|unique:branches,kode_cabang',
+            'nama_cabang' => 'required|string|max:255',
+            'nickname_cabang' => 'nullable|string|max:50',
+            'korwil_id' => 'nullable|exists:users,id',
+        ]);
+
+        \App\Models\Branch::create([
+            'kode_cabang' => $request->kode_cabang,
+            'nama_cabang' => $request->nama_cabang,
+            'nickname_cabang' => $request->nickname_cabang,
+            'korwil_id' => $request->korwil_id,
+            'is_active' => true, // Cabang baru otomatis aktif
+        ]);
+
+        return back()->with('success', 'Cabang baru berhasil didaftarkan ke dalam sistem!');
+    }
 }
