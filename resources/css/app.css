@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-slate-100 text-slate-900;
+    }
+}
+
+@layer components {
+    .page-shell {
+        @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    }
+
+    .page-stack {
+        @apply space-y-6 sm:space-y-8;
+    }
+
+    .surface-card {
+        @apply bg-white border border-slate-200 shadow-sm sm:rounded-2xl;
+    }
+
+    .surface-card-muted {
+        @apply bg-white/95 border border-slate-200/80 shadow-sm sm:rounded-2xl;
+    }
+
+    .section-pad {
+        @apply p-4 sm:p-6 lg:p-8;
+    }
+
+    .section-title {
+        @apply text-lg sm:text-xl font-semibold text-slate-900 tracking-tight;
+    }
+
+    .section-subtitle {
+        @apply text-sm text-slate-500;
+    }
+}

@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateRiskResolutionRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return (bool) $this->user();
+    }
+
+    public function rules(): array
+    {
+        return [
+            'resolution_status' => ['required', 'in:open,in_progress,closed'],
+        ];
+    }
+}
+

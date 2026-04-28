@@ -9,7 +9,10 @@ class RiskMitigation extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'risk_cause_id',
+        'mitigasi',
+    ];
 
     // Relasi balik: Mitigasi ini milik 1 Penyebab
     public function cause()

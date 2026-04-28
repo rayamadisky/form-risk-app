@@ -9,10 +9,11 @@ class RiskItem extends Model
 {
     use HasFactory;
 
-    // Bebasin batasan kolom biar gampang insert data nanti
-    protected $guarded = []; 
-
-    protected $fillable = ['nama_risiko', 'kategori', 'role_target'];
+    protected $fillable = [
+        'nama_risiko',
+        'kategori',
+        'role_target',
+    ];
     
     // Relasi: 1 Item Punya Banyak Penyebab
     public function causes()

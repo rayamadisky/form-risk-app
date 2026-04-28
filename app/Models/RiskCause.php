@@ -9,7 +9,10 @@ class RiskCause extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'risk_item_id',
+        'penyebab',
+    ];
 
     // Relasi balik: Penyebab ini milik 1 Item
     public function item()

@@ -1,13 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Riwayat & Monitoring Risiko Operasional') }}
-        </h2>
+        <div class="space-y-1">
+            <h2 class="font-semibold text-xl text-slate-900 leading-tight tracking-tight">
+                {{ __('Riwayat & Monitoring Risiko Operasional') }}
+            </h2>
+            <p class="text-sm text-slate-500">Filter, ringkasan, dan tabel data disusun lebih lega agar lebih cepat dibaca di semua ukuran layar.</p>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white p-4 shadow sm:rounded-lg mb-6 border border-gray-200">
+    <div class="py-6 sm:py-12">
+        <div class="page-shell page-stack">
+            <div class="surface-card section-pad">
                 <form method="GET" action="{{ route('risk.history') }}" class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end mb-6">
 
                     @if(in_array($role, ['teller', 'ca', 'csr', 'security']))
@@ -75,7 +78,7 @@
                         </select>
                     </div>
 
-                    <div class="md:col-span-4 flex gap-2">
+                    <div class="md:col-span-4 flex flex-col sm:flex-row gap-2">
                         <div class="flex-1">
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Dari Tgl</label>
                             <input type="date" name="start_date" value="{{ request('start_date') }}" class="block w-full border-gray-300 rounded-md shadow-sm text-sm h-[38px]">
@@ -87,34 +90,34 @@
                     </div>
                     @endif
 
-                    <div class="{{ in_array($role, ['teller', 'ca', 'csr', 'security']) ? 'md:col-span-6 mt-4' : 'md:col-span-2 mt-0' }} flex gap-2 justify-end items-end h-[38px]">
-                        <a href="{{ route('risk.history') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded text-sm shadow transition">
+                    <div class="{{ in_array($role, ['teller', 'ca', 'csr', 'security']) ? 'md:col-span-6 mt-4' : 'md:col-span-2 mt-0' }} flex flex-col sm:flex-row gap-2 justify-end items-stretch sm:items-end sm:h-[38px]">
+                        <a href="{{ route('risk.history') }}" class="w-full sm:w-auto text-center bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded text-sm shadow transition">
                             Reset
                         </a>
-                        <button type="submit" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded text-sm shadow transition">
+                        <button type="submit" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded text-sm shadow transition">
                             Filter
                         </button>
                     </div>
                 </form>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
-                    <p class="text-sm text-gray-500 font-bold uppercase">Total Kejadian Terdata</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="surface-card-muted p-6 border-l-4 border-blue-500">
+                    <p class="text-sm text-slate-500 font-bold uppercase tracking-[0.14em]">Total Kejadian Terdata</p>
                     <p class="text-2xl font-black">{{ $reports->count() }} <span class="text-sm font-normal text-gray-400">Kasus</span></p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
-                    <p class="text-sm text-gray-500 font-bold uppercase">Total Kerugian (Approved)</p>
+                <div class="surface-card-muted p-6 border-l-4 border-green-500">
+                    <p class="text-sm text-slate-500 font-bold uppercase tracking-[0.14em]">Total Kerugian (Approved)</p>
                     <p class="text-2xl font-black text-green-600">Rp {{ number_format($totalLoss, 0, ',', '.') }}</p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-red-500">
-                    <p class="text-sm text-gray-500 font-bold uppercase">Laporan di-Reject</p>
+                <div class="surface-card-muted p-6 border-l-4 border-red-500">
+                    <p class="text-sm text-slate-500 font-bold uppercase tracking-[0.14em]">Laporan di-Reject</p>
                     <p class="text-2xl font-black text-red-600">{{ $reports->where('status', 'rejected')->count() }}</p>
                 </div>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+            <div class="surface-card overflow-hidden">
+                <div class="overflow-x-auto -mx-4 sm:mx-0">
+                    <table class="min-w-[1100px] w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-center text-xs font-extrabold text-gray-500 uppercase tracking-wider">Tgl Lapor & Ketahui</th>

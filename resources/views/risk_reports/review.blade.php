@@ -1,14 +1,17 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Review Laporan Risiko (Checker)') }}
-        </h2>
+        <div class="space-y-1">
+            <h2 class="font-semibold text-xl text-slate-900 leading-tight tracking-tight">
+                {{ __('Review Laporan Risiko (Checker)') }}
+            </h2>
+            <p class="text-sm text-slate-500">Antrian approval dan tindak lanjut dipisahkan lebih jelas supaya proses review terasa lebih fokus.</p>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-8">
+    <div class="py-6 sm:py-12">
+        <div class="page-shell page-stack py-4 sm:py-8">
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-8 border-l-4 border-yellow-500">
+            <div class="surface-card overflow-hidden p-4 sm:p-6 border-l-4 border-yellow-500">
                 <h3 class="text-lg font-bold border-b pb-2 mb-4 text-gray-800">1. Menunggu Persetujuan Anda</h3>
 
                 @if($reports->isEmpty())
@@ -16,8 +19,8 @@
                     <p class="text-yellow-700 italic">Saat ini tidak ada laporan risiko baru yang butuh persetujuan Anda.</p>
                 </div>
                 @else
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white border border-gray-200">
+                <div class="overflow-x-auto -mx-4 sm:mx-0">
+                    <table class="min-w-[1050px] w-full bg-white border border-gray-200">
                         <thead class="bg-gray-100">
                             <tr>
                                 <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase">Tgl (Lapor/Kejadian/Diket)</th>
@@ -104,7 +107,7 @@
                 @endif
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-blue-500">
+            <div class="surface-card overflow-hidden p-4 sm:p-6 border-l-4 border-blue-500">
                 <h3 class="text-lg font-bold border-b pb-2 mb-4 text-gray-800">2. Menunggu Tindak Lanjut (Penyelesaian)</h3>
 
                 @if($tindakLanjut->isEmpty())
@@ -112,8 +115,8 @@
                     <p class="text-blue-700 italic">Semua laporan yang di-Approve sudah selesai ditindaklanjuti.</p>
                 </div>
                 @else
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white border border-gray-200">
+                <div class="overflow-x-auto -mx-4 sm:mx-0">
+                    <table class="min-w-[1050px] w-full bg-white border border-gray-200">
                         <thead class="bg-gray-100">
                             <tr>
                                 <th class="py-3 px-4 border-b text-left text-xs font-semibold text-gray-700 uppercase">Tgl (Lapor/Kejadian)</th>
@@ -167,7 +170,15 @@
                                 </td>
 
                                 <td class="py-3 px-4 border-b text-sm align-middle text-center">
-                                    <span class="px-2 py-1 {{ $tl->resolution_status == 'open,in_progress' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800' }} rounded font-bold text-xs uppercase border">
+                                    @php
+                                        $resolutionColors = [
+                                            'open' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                            'in_progress' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                            'closed' => 'bg-green-100 text-green-800 border-green-200',
+                                        ];
+                                        $resolutionClass = $resolutionColors[$tl->resolution_status] ?? 'bg-gray-100 text-gray-800 border-gray-200';
+                                    @endphp
+                                    <span class="px-2 py-1 {{ $resolutionClass }} rounded font-bold text-xs uppercase border">
                                         {{ $tl->resolution_status }}
                                     </span>
                                 </td>
@@ -180,10 +191,10 @@
                                             <input type="hidden" name="note" value="Update status dari halaman Review">
 
                                             @php
-                                            $userRole = auth()->user()->roles->first()->name ?? '';
+                                            $userRole = auth()->user()?->primaryRoleName() ?? '';
                                             $canClose = false;
 
-                                            if (in_array($userRole, ['korwil', 'manrisk'])) {
+                                            if (in_array($userRole, ['korwil'])) {
                                             $canClose = true;
                                             } elseif ($userRole === 'kacab' && $tl->user_id != auth()->user()->id) {
                                             $canClose = true;

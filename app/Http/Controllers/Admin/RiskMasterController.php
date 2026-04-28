@@ -26,7 +26,7 @@ class RiskMasterController extends Controller
             'role_target' => 'required|in:teller,ca,csr,security,kacab,korwil',
         ]);
 
-        RiskItem::create($request->all());
+        RiskItem::create($request->only(['nama_risiko', 'kategori', 'role_target']));
         return back()->with('success', 'Pertanyaan risiko baru berhasil ditambahkan!');
     }
 

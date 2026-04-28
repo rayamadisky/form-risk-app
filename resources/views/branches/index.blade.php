@@ -1,12 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-xl text-gray-800 leading-tight">
-            {{ __('Manajemen Master Data Cabang') }}
-        </h2>
+        <div class="space-y-1">
+            <h2 class="font-bold text-xl text-slate-900 leading-tight tracking-tight">
+                {{ __('Manajemen Master Data Cabang') }}
+            </h2>
+            <p class="text-sm text-slate-500">Atur daftar cabang dan penanggung jawab korwil dengan spacing yang lebih rapi dan mudah dipindai.</p>
+        </div>
     </x-slot>
 
-    <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 sm:py-8">
+        <div class="page-shell page-stack">
 
             @if(session('success'))
             <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
@@ -14,8 +17,8 @@
             </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
+            <div class="surface-card overflow-hidden">
+                <div class="p-4 sm:p-6 bg-white border-b border-slate-200">
                     <h3 class="text-sm font-bold text-blue-800 uppercase mb-4">Pendaftaran Cabang Baru</h3>
                     <form action="{{ route('branches.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                         @csrf
@@ -46,7 +49,8 @@
                             </button>
                         </div>
                     </form>
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <div class="overflow-x-auto -mx-4 sm:mx-0 mt-6">
+                    <table class="min-w-[920px] w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
                             <tr>
                                 <th class="px-6 py-3 text-left">Kode Cabang</th>
@@ -107,6 +111,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
 
                 </div>
             </div>

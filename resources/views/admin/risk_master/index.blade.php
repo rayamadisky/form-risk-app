@@ -1,11 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <div class="space-y-1">
+            <h2 class="font-semibold text-xl text-slate-900 leading-tight tracking-tight">
             {{ __('Control Center: Manajemen Master Data Risiko') }}
-        </h2>
+            </h2>
+            <p class="text-sm text-slate-500">Kelola bank soal risiko dengan tata letak yang lebih rapi, lega, dan cepat dipindai.</p>
+        </div>
     </x-slot>
 
-    <div class="py-12" x-data="{ 
+    <div class="py-6 sm:py-12" x-data="{ 
         filterRole: 'semua',
         filterKategori: 'semua',  // <--- TAMBAHIN BARIS INI
         activeModal: null,
@@ -16,10 +19,13 @@
             this.editCauseModal = true;
         }
     }">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="page-shell page-stack">
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg border-t-4 border-blue-600">
-                <h3 class="text-lg font-bold mb-4 text-gray-900">Tambah Pertanyaan Risiko Baru</h3>
+            <div class="surface-card section-pad border-t-4 border-blue-600">
+                <div class="mb-6 space-y-1">
+                    <h3 class="section-title">Tambah Pertanyaan Risiko Baru</h3>
+                    <p class="section-subtitle">Isi data inti secara singkat. Form sengaja dibuat lapang agar tetap nyaman dipakai di desktop maupun smartphone.</p>
+                </div>
                 <form action="{{ route('admin.risk_master.store_item') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     @csrf
                     <div>
@@ -44,33 +50,36 @@
                             <option value="non-finansial">Non-Finansial (Risk Event)</option>
                         </select>
                     </div>
-                    <div class="md:col-span-3 text-right">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition">
+                    <div class="md:col-span-3 flex justify-end pt-2">
+                        <button type="submit" class="inline-flex w-full sm:w-auto justify-center items-center px-5 py-2.5 bg-blue-600 rounded-xl font-semibold text-xs text-white uppercase tracking-[0.16em] hover:bg-blue-700 transition shadow-sm">
                             Simpan Pertanyaan
                         </button>
                     </div>
                 </form>
             </div>
 
-            <div class="bg-white shadow sm:rounded-lg overflow-hidden border border-gray-200">
+            <div class="surface-card overflow-hidden">
                 
-                <div class="bg-gray-50 border-b border-gray-200 p-4 flex justify-between items-center">
-                    <h3 class="text-md font-bold text-gray-700 uppercase hidden md:block">Daftar Pertanyaan Risiko</h3>
+                <div class="bg-slate-50/90 border-b border-slate-200 p-4 sm:p-5 flex flex-col gap-4 md:flex-row md:justify-between md:items-center">
+                    <div class="space-y-1">
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-[0.16em]">Daftar Pertanyaan Risiko</h3>
+                        <p class="text-sm text-slate-500">Gunakan filter untuk menyaring kategori dan jabatan, lalu buka detail untuk edit penyebab dan mitigasi.</p>
+                    </div>
                     
-                    <div class="flex items-center gap-4 w-full md:w-auto">
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4 w-full md:w-auto">
                         
-                        <div class="flex items-center gap-2">
-                            <label class="text-[10px] font-bold text-gray-500 uppercase">Kategori:</label>
-                            <select x-model="filterKategori" class="text-xs rounded border-gray-300 focus:ring-blue-500 py-1 px-2 font-semibold">
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.16em]">Kategori:</label>
+                            <select x-model="filterKategori" class="flex-1 min-w-[160px] text-xs rounded-xl border-slate-300 focus:ring-blue-500 py-2 px-3 font-semibold bg-white">
                                 <option value="semua">Semua</option>
                                 <option value="finansial">Finansial</option>
                                 <option value="non-finansial">Non-Finansial</option>
                             </select>
                         </div>
 
-                        <div class="flex items-center gap-2">
-                            <label class="text-[10px] font-bold text-gray-500 uppercase">Jabatan:</label>
-                            <select x-model="filterRole" class="text-xs rounded border-gray-300 focus:ring-blue-500 py-1 px-2 font-semibold">
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.16em]">Jabatan:</label>
+                            <select x-model="filterRole" class="flex-1 min-w-[160px] text-xs rounded-xl border-slate-300 focus:ring-blue-500 py-2 px-3 font-semibold bg-white">
                                 <option value="semua">Semua</option>
                                 @foreach($riskItems->pluck('role_target')->unique() as $role)
                                     <option value="{{ strtolower($role) }}">{{ strtoupper($role) }}</option>
@@ -81,26 +90,33 @@
                     </div>
                 </div>
 
-                <div class="divide-y divide-gray-100">
+                <div class="divide-y divide-slate-100">
                     @forelse($riskItems as $item)
                         <div x-show="(filterRole === 'semua' || filterRole === '{{ strtolower($item->role_target) }}') && (filterKategori === 'semua' || filterKategori === '{{ strtolower($item->kategori) }}')" 
                              x-transition
-                             class="p-4 hover:bg-blue-50 cursor-pointer transition flex flex-col md:flex-row justify-between md:items-center gap-4 group"
+                             class="p-4 sm:p-5 hover:bg-slate-50 cursor-pointer transition flex items-start justify-between gap-4 group"
                              @click="activeModal = {{ $item->id }}">
                             
-                            <div>
-                                <span class="px-2 py-0.5 inline-flex text-[10px] leading-5 font-bold rounded-full bg-blue-100 text-blue-800 uppercase mb-1">
-                                    {{ $item->role_target }}
-                                </span>
-                                <h4 class="text-sm font-bold text-gray-900 group-hover:text-blue-700 transition">{{ $item->nama_risiko }}</h4>
-                                <p class="text-xs text-gray-500 mt-1">{{ $item->causes->count() }} Penyebab terdaftar</p>
+                            <div class="min-w-0 flex-1 pr-2">
+                                <div class="mb-2 flex flex-wrap items-center gap-2">
+                                    <span class="px-2.5 py-1 inline-flex text-[10px] leading-none font-bold rounded-full bg-blue-100 text-blue-700 uppercase tracking-[0.16em]">
+                                        {{ $item->role_target }}
+                                    </span>
+                                    <span class="px-2.5 py-1 inline-flex text-[10px] leading-none font-bold rounded-full {{ strtolower($item->kategori) === 'finansial' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700' }} uppercase tracking-[0.16em]">
+                                        {{ $item->kategori }}
+                                    </span>
+                                </div>
+                                <h4 class="text-sm sm:text-base font-semibold text-slate-900 group-hover:text-blue-700 transition leading-snug break-words">{{ $item->nama_risiko }}</h4>
+                                <p class="text-xs text-slate-500 mt-2">{{ $item->causes->count() }} Penyebab terdaftar</p>
                             </div>
 
-                            <div class="flex items-center gap-4">
-                                <span class="text-xs font-bold text-blue-500 opacity-0 group-hover:opacity-100 transition">Lihat Detail &rarr;</span>
+                            <div class="flex shrink-0 items-start gap-3 ml-auto">
+                                <span class="hidden md:inline text-xs font-semibold text-slate-400 opacity-0 group-hover:opacity-100 transition pt-2">Lihat Detail</span>
                                 <form action="{{ route('admin.risk_master.destroy_item', $item->id) }}" method="POST" class="relative z-10" @click.stop="if(!confirm('Hapus pertanyaan ini?')) $event.preventDefault()">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 px-3 py-1 rounded text-xs font-bold uppercase transition">Hapus</button>
+                                    <button type="submit" class="inline-flex items-center justify-center min-w-[84px] text-rose-600 hover:text-white hover:bg-rose-500 border border-rose-300 px-3.5 py-2 rounded-xl text-[11px] font-bold uppercase tracking-[0.14em] transition bg-white">
+                                        Hapus
+                                    </button>
                                 </form>
                             </div>
                         </div>
@@ -111,12 +127,12 @@
                                 <div x-show="activeModal === {{ $item->id }}" x-transition.opacity class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="activeModal = null" aria-hidden="true"></div>
                                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                                <div x-show="activeModal === {{ $item->id }}" x-transition class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl w-full">
+                                <div x-show="activeModal === {{ $item->id }}" x-transition class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl w-full max-w-full">
                                     
-                                    <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center sticky top-0 z-10">
+                                    <div class="bg-slate-50 px-4 py-4 border-b border-slate-200 flex items-start justify-between gap-3 sticky top-0 z-10">
                                         <div>
-                                            <span class="text-[10px] font-bold text-gray-500 uppercase">{{ $item->role_target }}</span>
-                                            <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">{{ $item->nama_risiko }}</h3>
+                                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.16em]">{{ $item->role_target }}</span>
+                                            <h3 class="text-lg leading-6 font-bold text-slate-900" id="modal-title">{{ $item->nama_risiko }}</h3>
                                         </div>
                                         <button @click="activeModal = null" class="text-gray-400 hover:text-red-500 font-bold text-2xl focus:outline-none">&times;</button>
                                     </div>
@@ -124,7 +140,7 @@
                                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                         <h4 class="text-xs font-bold text-gray-500 uppercase mb-4 border-b pb-2">Daftar Penyebab & Mitigasi (Sebab-Akibat)</h4>
                                         
-                                        <div class="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
+                                        <div class="space-y-4 max-h-[50vh] overflow-y-auto pr-1 sm:pr-2">
                                             @forelse($item->causes as $cause)
                                                 @php $mitigasiTeks = $cause->mitigations->first()->mitigasi ?? ''; @endphp
                                                 
@@ -161,7 +177,7 @@
                                                 @csrf
                                                 <input type="text" name="penyebab" required placeholder="Teks Penyebab..." class="text-sm flex-1 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                                                 <input type="text" name="mitigasi" placeholder="Teks Mitigasi (Opsional)..." class="text-sm flex-1 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
-                                                <button type="submit" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded text-xs transition shadow-sm uppercase">Simpan</button>
+                                                <button type="submit" class="w-full md:w-auto bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded text-xs transition shadow-sm uppercase">Simpan</button>
                                             </form>
                                         </div>
                                     </div>

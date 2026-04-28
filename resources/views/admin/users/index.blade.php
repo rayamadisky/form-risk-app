@@ -1,12 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Manajemen Karyawan (Super Admin)') }}
-        </h2>
+        <div class="space-y-1">
+            <h2 class="font-semibold text-xl text-slate-900 leading-tight tracking-tight">
+                {{ __('Manajemen Karyawan (Super Admin)') }}
+            </h2>
+            <p class="text-sm text-slate-500">Kelola akun, status aktif, dan mutasi user dengan tata letak yang lebih bersih dan efisien.</p>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 sm:py-12">
+        <div class="page-shell page-stack">
 
             @if(session('success'))
             <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
@@ -19,23 +22,24 @@
             </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+            <div class="surface-card overflow-hidden">
+                <div class="p-4 sm:p-6 text-gray-900 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                     <h3 class="text-lg font-bold">Daftar Karyawan BPR</h3>
                 </div>
 
-                <div class="py-12">
-                    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="py-6 sm:py-12">
+                    <div class="page-shell">
 
-                        <div class="flex justify-between items-center mb-6">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-6">
                             <h3 class="text-lg font-bold text-gray-800 uppercase tracking-wider">Manajemen Pengguna BPR</h3>
-                            <button onclick="document.getElementById('modalTambah').classList.remove('hidden')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded text-sm shadow">
+                            <button onclick="document.getElementById('modalTambah').classList.remove('hidden')" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded text-sm shadow">
                                 + Tambah User Baru
                             </button>
                         </div>
 
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200">
-                            <table class="min-w-full divide-y divide-gray-200">
+                            <div class="overflow-x-auto -mx-4 sm:mx-0">
+                            <table class="min-w-[850px] w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Nama & Username</th>
@@ -66,7 +70,7 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                            <button onclick="openEditModal({{ $user }})" class="text-indigo-600 hover:text-indigo-900 font-bold uppercase text-[10px]">Edit</button>
+                                            <button onclick="openEditModal({{ $user }})" class="inline-block text-indigo-600 hover:text-indigo-900 font-bold uppercase text-[10px]">Edit</button>
 
                                             <form action="{{ route('admin.users.toggle', $user->id) }}" method="POST" class="inline">
                                                 @csrf
@@ -79,13 +83,14 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div id="modalTambah" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full">
-            <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="relative top-6 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold text-gray-900 uppercase">Tambah User Baru</h3>
                     <button onclick="document.getElementById('modalTambah').classList.add('hidden')" class="text-gray-400 hover:text-red-500 font-bold text-xl">&times;</button>
@@ -96,7 +101,7 @@
                         <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
                         <input type="text" name="name" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Username</label>
                             <input type="text" name="username" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500">
@@ -106,7 +111,7 @@
                             <input type="email" name="email" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500">
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Password</label>
                             <input type="password" name="password" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500">
@@ -116,7 +121,7 @@
                             <input type="password" name="password_confirmation" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-indigo-500">
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Cabang Penempatan</label>
                             <select name="branch_id" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm uppercase focus:ring-indigo-500">
@@ -142,7 +147,7 @@
         </div>
 
         <div id="modalEdit" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full">
-            <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white border-t-4 border-t-yellow-500">
+            <div class="relative top-6 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md shadow-lg rounded-md bg-white border-t-4 border-t-yellow-500">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold text-gray-900 uppercase">Edit / Mutasi User</h3>
                     <button onclick="document.getElementById('modalEdit').classList.add('hidden')" class="text-gray-400 hover:text-red-500 font-bold text-xl">&times;</button>
@@ -156,7 +161,7 @@
                         <input type="text" name="name" id="edit_name" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm bg-gray-50 focus:ring-indigo-500">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Mutasi Cabang</label>
                             <select name="branch_id" id="edit_branch" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm uppercase focus:ring-indigo-500">

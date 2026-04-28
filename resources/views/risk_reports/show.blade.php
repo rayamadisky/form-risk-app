@@ -1,30 +1,30 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-bold text-xl text-gray-800 leading-tight">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 class="font-bold text-lg sm:text-xl text-gray-800 leading-tight">
                 {{ __('Detail Laporan Risiko') }} #{{ str_pad($report->id, 5, '0', STR_PAD_LEFT) }}
             </h2>
-            <a href="{{ url()->previous() }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded text-sm shadow">
+            <a href="{{ url()->previous() }}" class="inline-flex w-full sm:w-auto justify-center bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded text-sm shadow">
                 &larr; Kembali
             </a>
         </div>
     </x-slot>
 
-    <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 sm:py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 <div class="lg:col-span-2 space-y-6">
 
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 {{ $report->kategori === 'finansial' ? 'border-t-red-500' : 'border-t-orange-500' }}">
-                        <div class="p-6">
-                            <div class="flex justify-between items-start mb-6 border-b pb-4">
+                        <div class="p-4 sm:p-6">
+                            <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start mb-6 border-b pb-4">
                                 <div>
-                                    <h3 class="text-lg font-bold text-gray-900">{{ $report->item->nama_risiko ?? $report->other_item_description }}</h3>
+                                    <h3 class="text-lg font-bold text-gray-900 break-words">{{ $report->item->nama_risiko ?? $report->other_item_description }}</h3>
                                     <p class="text-sm text-gray-500 mt-1">Dilaporkan oleh: <span class="font-bold text-gray-700">{{ $report->user->name }}</span> ({{ $report->branch->nama_cabang }})</p>
                                 </div>
-                                <div class="text-right flex flex-col gap-2 items-end">
+                                <div class="flex flex-wrap gap-2 sm:max-w-[220px] sm:justify-end sm:text-right">
                                     <span class="px-3 py-1 text-xs font-bold uppercase rounded-full {{ $report->kategori === 'finansial' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800' }}">
                                         {{ $report->kategori }}
                                     </span>
@@ -38,7 +38,7 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mb-4">
                                 <div>
                                     <p class="text-gray-500 font-bold text-xs uppercase">Tanggal Kejadian</p>
                                     <p class="font-semibold text-gray-800">{{ \Carbon\Carbon::parse($report->tanggal_kejadian)->format('d F Y') }}</p>
@@ -52,7 +52,7 @@
                     </div>
 
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div class="p-6">
+                        <div class="p-4 sm:p-6">
                             <h3 class="text-md font-bold text-gray-900 border-b pb-2 mb-4 uppercase tracking-wider">Analisa & Mitigasi</h3>
 
                             <div class="mb-4">
@@ -85,7 +85,7 @@
                     </div>
 
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div class="p-6">
+                        <div class="p-4 sm:p-6">
                             <h3 class="text-md font-bold text-gray-900 border-b pb-2 mb-4 uppercase tracking-wider">Dampak Kerugian</h3>
 
                             @if($report->kategori === 'finansial')
@@ -109,10 +109,10 @@
 
                 <div class="lg:col-span-1 space-y-6">
 
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg sticky top-6">
-                        <div class="p-6">
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg lg:sticky lg:top-6">
+                        <div class="p-4 sm:p-6">
 
-                            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center border-b pb-4 mb-4">
                                 <h3 class="text-md font-bold text-gray-900 uppercase tracking-wider">Status Resolusi</h3>
                                 @php
                                 $resColors = [
@@ -128,8 +128,7 @@
                             </div>
 
                             @php
-                                // Tarik nama role secara paksa jadi teks murni
-                                $userRole = auth()->user()->roles->first()->name ?? '';
+                                $userRole = auth()->user()?->primaryRoleName() ?? '';
                             @endphp
 
                             @if($report->approval_status === 'approved' && $report->resolution_status !== 'closed' && $userRole !== 'manrisk')
@@ -147,8 +146,8 @@
                                         @php
                                             $canClose = false;
                                             
-                                            // Logika IF pakai string murni untuk mematikan cache bug
-                                            if (in_array($userRole, ['korwil', 'manrisk'])) {
+                                            // Backend tetap jadi sumber otoritas; UI ini hanya mempermudah
+                                            if (in_array($userRole, ['korwil'])) {
                                                 $canClose = true;
                                             } elseif ($userRole === 'kacab' && $report->user_id != auth()->user()->id) {
                                                 $canClose = true;

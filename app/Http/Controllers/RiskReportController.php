@@ -7,9 +7,95 @@ use App\Models\RiskItem;
 use App\Models\RiskReport;
 use App\Models\Branch;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Response;
+use App\Http\Requests\StoreRiskReportRequest;
+use App\Http\Requests\UpdateRiskApprovalStatusRequest;
+use App\Http\Requests\UpdateRiskResolutionRequest;
+use App\Http\Requests\AddRiskProgressRequest;
 
 class RiskReportController extends Controller
 {
+    private function primaryRoleName(): ?string
+    {
+        return Auth::user()?->primaryRoleName();
+    }
+
+    private function ensureCanViewReport(RiskReport $report): void
+    {
+        $user = Auth::user();
+        $role = $user?->primaryRoleName();
+
+        if (!$user || !$role) {
+            abort(Response::HTTP_FORBIDDEN, 'Akses ditolak.');
+        }
+
+        if ($role === 'manrisk') {
+            return;
+        }
+
+        if ($role === 'kacab' && (int) $report->branch_id === (int) $user->branch_id) {
+            return;
+        }
+
+        if ($role === 'korwil') {
+            $branchIds = Branch::where('korwil_id', $user->id)->pluck('id');
+            if ($branchIds->contains((int) $report->branch_id)) {
+                return;
+            }
+        }
+
+        if (in_array($role, ['teller', 'ca', 'csr', 'security'], true) && (int) $report->user_id === (int) $user->id) {
+            return;
+        }
+
+        abort(Response::HTTP_FORBIDDEN, 'Akses ditolak.');
+    }
+
+    private function ensureCanApproveReport(RiskReport $report): void
+    {
+        $user = Auth::user();
+        $role = $user?->primaryRoleName();
+
+        if (!$user || !$role) {
+            abort(Response::HTTP_FORBIDDEN, 'Akses ditolak.');
+        }
+
+        if ($role === 'kacab') {
+            if ((int) $report->branch_id !== (int) $user->branch_id || $report->approval_status !== 'pending_kacab') {
+                abort(Response::HTTP_FORBIDDEN, 'Anda tidak berwenang menyetujui laporan ini.');
+            }
+            return;
+        }
+
+        if ($role === 'korwil') {
+            $branchIds = Branch::where('korwil_id', $user->id)->pluck('id');
+            if (!$branchIds->contains((int) $report->branch_id) || $report->approval_status !== 'pending_korwil') {
+                abort(Response::HTTP_FORBIDDEN, 'Anda tidak berwenang menyetujui laporan ini.');
+            }
+            return;
+        }
+
+        abort(Response::HTTP_FORBIDDEN, 'Anda tidak berwenang menyetujui laporan ini.');
+    }
+
+    private function ensureCanUpdateProgress(RiskReport $report): void
+    {
+        $user = Auth::user();
+        $role = $user?->primaryRoleName();
+
+        if (!$user || !$role) {
+            abort(Response::HTTP_FORBIDDEN, 'Akses ditolak.');
+        }
+
+        // ManRisk hanya pantau.
+        if ($role === 'manrisk') {
+            abort(Response::HTTP_FORBIDDEN, 'Akses Ditolak! Divisi ManRisk hanya berwenang memantau, bukan mengubah progress penanganan.');
+        }
+
+        // Minimal bisa melihat laporan dulu.
+        $this->ensureCanViewReport($report);
+    }
+
     public function create($kategori)
     {
         // Validasi biar orang gak ngetik URL sembarangan
@@ -17,7 +103,10 @@ class RiskReportController extends Controller
             abort(404, 'Kategori Risiko Tidak Ditemukan');
         }
 
-        $userRole = Auth::user()->roles->first()->name;
+        $userRole = $this->primaryRoleName();
+        if (!$userRole) {
+            abort(Response::HTTP_FORBIDDEN, 'Akses ditolak. Role user tidak ditemukan.');
+        }
 
         // Tarik soal yang sesuai dengan JABATAN dan KATEGORI-nya
         $riskItems = RiskItem::with('causes.mitigations')
@@ -28,32 +117,8 @@ class RiskReportController extends Controller
         return view('risk_reports.create', compact('riskItems', 'kategori'));
     }
 
-    public function store(Request $request)
+    public function store(StoreRiskReportRequest $request)
     {
-        // 1. Validasi Dinamis (Tergantung Kategori)
-        $rules = [
-            'kategori' => 'required|in:finansial,non-finansial',
-            'tanggal_kejadian' => 'required|date',
-            'tanggal_diketahui' => 'required|date',
-            'risk_item_id' => 'required',
-            'risk_cause_id' => 'required_without:other_item_description',
-            'other_item_description' => 'required_without:risk_cause_id',
-        ];
-
-        // Kalau Finansial, wajib isi nominal angka
-        if ($request->kategori === 'finansial') {
-            $rules['dampak_finansial'] = 'required|numeric';
-        }
-        // Kalau Non-Finansial, wajib isi keterangan cerita
-        else {
-            $rules['dampak_non_finansial'] = 'required|string';
-        }
-        $rules['tindakan_awal'] = 'nullable|string';
-        $rules['status_awal'] = 'required|in:open,in_progress';
-
-        // Cukup panggil validasi SATU KALI aja
-        $request->validate($rules);
-
         $user = Auth::user();
         $targetApproval = $user->hasRole('kacab') ? 'pending_korwil' : 'pending_kacab';
 
@@ -93,7 +158,10 @@ class RiskReportController extends Controller
     public function review()
     {
         $user = Auth::user();
-        $role = $user->roles->first()->name;
+        $role = $user?->primaryRoleName();
+        if (!$user || !$role) {
+            abort(Response::HTTP_FORBIDDEN, 'Akses ditolak.');
+        }
 
         $reports = collect();
         $tindakLanjut = collect();
@@ -138,10 +206,10 @@ class RiskReportController extends Controller
     }
 
     // PROSES APPROVAL
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(UpdateRiskApprovalStatusRequest $request, $id)
     {
         $report = RiskReport::findOrFail($id);
-        $request->validate(['status' => 'required|in:approved,rejected']);
+        $this->ensureCanApproveReport($report);
 
         // Update status persetujuan
         $report->update(['approval_status' => $request->status]);
@@ -155,7 +223,10 @@ class RiskReportController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $role = $user->roles->first()->name;
+        $role = $user?->primaryRoleName();
+        if (!$user || !$role) {
+            abort(Response::HTTP_FORBIDDEN, 'Akses ditolak.');
+        }
 
         // 1. Tarik Relasi Dasar
         $query = RiskReport::with(['user', 'item', 'cause.mitigations', 'branch']);
@@ -228,10 +299,10 @@ class RiskReportController extends Controller
     }
 
     // UPDATE TINDAK LANJUT (RESOLUTION)
-    public function updateResolution(Request $request, $id)
+    public function updateResolution(UpdateRiskResolutionRequest $request, $id)
     {
         $report = RiskReport::findOrFail($id);
-        $request->validate(['resolution_status' => 'required|in:monitoring,closed']);
+        $this->ensureCanUpdateProgress($report);
 
         $report->update(['resolution_status' => $request->resolution_status]);
 
@@ -239,10 +310,11 @@ class RiskReportController extends Controller
     }
 
     // FUNGSI TAMBAHAN: CATAT PROGRESS TINDAK LANJUT (NOTE + STATUS)
-    public function addProgress(Request $request, $id)
+    public function addProgress(AddRiskProgressRequest $request, $id)
     {
         $user = Auth::user();
         $report = RiskReport::findOrFail($id);
+        $this->ensureCanUpdateProgress($report);
 
         // 1. Cek jika user mencoba menutup laporan (Closed)
         // 1. Cek jika user mencoba menutup laporan (Closed)
@@ -258,18 +330,6 @@ class RiskReportController extends Controller
                 return back()->with('error', 'Hanya Atasan yang berwenang menutup laporan.');
             }
         }
-
-        // GEMBOK BACK-END: ManRisk dilarang keras eksekusi fungsi ini
-        if ($user->hasRole('manrisk')) {
-            return back()->with('error', 'Akses Ditolak! Divisi ManRisk hanya berwenang memantau, bukan mengubah progress penanganan.');
-        }
-        $request->validate([
-            'note' => 'required|string|min:5',
-            'new_status' => 'required|in:in_progress,closed'
-        ]);
-
-        $report = RiskReport::findOrFail($id);
-        $user = Auth::user();
 
         // VALIDASI OTORITAS: Cuma Kacab/Korwil yang bisa ngetok status 'closed'
         if ($request->new_status === 'closed' && !$user->hasAnyRole(['kacab', 'korwil'])) {
@@ -293,6 +353,7 @@ class RiskReportController extends Controller
     public function show($id)
     {
         $report = RiskReport::with(['user', 'item', 'branch', 'cause.mitigations', 'logs.user'])->findOrFail($id);
+        $this->ensureCanViewReport($report);
 
         return view('risk_reports.show', compact('report'));
     }

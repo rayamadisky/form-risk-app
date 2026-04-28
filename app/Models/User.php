@@ -62,5 +62,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Branch::class, 'korwil_id');
     }
+
+    public function primaryRoleName(): ?string
+    {
+        $role = $this->getRoleNames()->first();
+        return $role ? (string) $role : null;
+    }
     
 }
