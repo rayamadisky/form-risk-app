@@ -131,7 +131,7 @@
                                 $userRole = auth()->user()?->primaryRoleName() ?? '';
                             @endphp
 
-                            @if($report->approval_status === 'approved' && $report->resolution_status !== 'closed' && $userRole !== 'manrisk')
+                            @if($report->approval_status === 'approved' && $report->resolution_status !== 'closed' && $userRole === 'kacab')
                             <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
                                 <form action="{{ route('risk_reports.add_progress', $report->id) }}" method="POST">
                                     @csrf
@@ -142,21 +142,7 @@
                                     <label class="block text-xs font-bold text-blue-800 uppercase mb-1">Set Status Menjadi:</label>
                                     <select name="new_status" class="w-full rounded-md border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 mb-3">
                                         <option value="in_progress" {{ $report->resolution_status == 'in_progress' ? 'selected' : '' }}>In Progress (Sedang dikerjakan)</option>
-
-                                        @php
-                                            $canClose = false;
-                                            
-                                            // Backend tetap jadi sumber otoritas; UI ini hanya mempermudah
-                                            if (in_array($userRole, ['korwil'])) {
-                                                $canClose = true;
-                                            } elseif ($userRole === 'kacab' && $report->user_id != auth()->user()->id) {
-                                                $canClose = true;
-                                            }
-                                        @endphp
-
-                                        @if($canClose)
                                         <option value="closed" class="font-bold text-green-600">Closed (Selesai Tuntas)</option>
-                                        @endif
                                     </select>
 
                                     <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm transition">

@@ -192,13 +192,7 @@
 
                                             @php
                                             $userRole = auth()->user()?->primaryRoleName() ?? '';
-                                            $canClose = false;
-
-                                            if (in_array($userRole, ['korwil'])) {
-                                            $canClose = true;
-                                            } elseif ($userRole === 'kacab' && $tl->user_id != auth()->user()->id) {
-                                            $canClose = true;
-                                            }
+                                            $canClose = ($userRole === 'kacab');
                                             @endphp
 
                                             <select name="new_status" class="w-full max-w-[150px] text-xs border-gray-300 rounded shadow-sm focus:ring-blue-500">

@@ -126,9 +126,9 @@
     @endhasanyrole
 
     {{-- ============================================================
-         CHECKER SECTION — Review
+         CHECKER SECTION — Review (Khusus Kacab)
          ============================================================ --}}
-    @hasanyrole('kacab|korwil')
+    @hasrole('kacab')
     <div class="mb-8">
         <div class="flex items-center gap-3 mb-5">
             <div class="w-1 h-6 bg-amber-500 rounded-full"></div>
@@ -146,11 +146,11 @@
                         <p class="text-sm text-slate-500 mt-0.5">Approve atau reject laporan dari bawahan Anda</p>
                     </div>
                 </div>
-                <span class="badge-pending text-xs">0 Menunggu</span>
+                <span class="badge-pending text-xs">{{ $pendingCount }} Menunggu</span>
             </div>
         </a>
     </div>
-    @endhasanyrole
+    @endhasrole
 
     {{-- ============================================================
          DATA TABLE — Recent Reports

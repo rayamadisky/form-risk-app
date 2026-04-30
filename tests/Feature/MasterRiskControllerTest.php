@@ -9,6 +9,7 @@ use App\Models\RiskMitigation;
 use Spatie\Permission\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class MasterRiskControllerTest extends TestCase
 {
@@ -35,7 +36,7 @@ class MasterRiskControllerTest extends TestCase
     //  AUTHORIZATION — SAD PATHS
     // -----------------------------------------------------------------------
 
-    /** @test */
+    #[Test]
     public function user_without_manrisk_role_cannot_view_the_index_page()
     {
         $this->actingAs($this->nonManriskUser)
@@ -43,7 +44,7 @@ class MasterRiskControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    #[Test]
     public function user_without_manrisk_role_cannot_store_a_cause()
     {
         $item = RiskItem::factory()->create();
@@ -55,7 +56,7 @@ class MasterRiskControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    #[Test]
     public function user_without_manrisk_role_cannot_store_a_mitigation()
     {
         $cause = RiskCause::factory()->create();
@@ -71,7 +72,7 @@ class MasterRiskControllerTest extends TestCase
     //  VALIDATION — SAD PATHS (MANRISK USER)
     // -----------------------------------------------------------------------
 
-    /** @test */
+    #[Test]
     public function store_cause_validates_required_fields()
     {
         $item = RiskItem::factory()->create();
@@ -89,7 +90,7 @@ class MasterRiskControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function store_mitigation_validates_required_fields()
     {
         $cause = RiskCause::factory()->create();
@@ -107,7 +108,7 @@ class MasterRiskControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function store_cause_validates_max_string_length()
     {
         $item = RiskItem::factory()->create();
@@ -121,7 +122,7 @@ class MasterRiskControllerTest extends TestCase
             ->assertSessionHasErrors('penyebab');
     }
 
-    /** @test */
+    #[Test]
     public function store_mitigation_validates_max_string_length()
     {
         $cause = RiskCause::factory()->create();
@@ -139,7 +140,7 @@ class MasterRiskControllerTest extends TestCase
     //  EXECUTION — HAPPY PATHS (MANRISK USER)
     // -----------------------------------------------------------------------
 
-    /** @test */
+    #[Test]
     public function manrisk_user_can_access_index_page()
     {
         $response = $this->actingAs($this->manriskUser)
@@ -148,7 +149,7 @@ class MasterRiskControllerTest extends TestCase
         $response->assertOk();
     }
 
-    /** @test */
+    #[Test]
     public function manrisk_user_can_store_a_new_cause_and_persist_to_database()
     {
         $item = RiskItem::factory()->create();
@@ -166,7 +167,7 @@ class MasterRiskControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function manrisk_user_can_store_a_new_mitigation_and_persist_to_database()
     {
         $cause = RiskCause::factory()->create();
@@ -184,7 +185,7 @@ class MasterRiskControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function manrisk_user_can_store_multiple_causes_under_the_same_risk_item()
     {
         $item = RiskItem::factory()->create();
@@ -208,7 +209,7 @@ class MasterRiskControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function manrisk_user_can_store_multiple_mitigations_under_the_same_cause()
     {
         $cause = RiskCause::factory()->create();
@@ -233,7 +234,7 @@ class MasterRiskControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function store_cause_fails_when_risk_item_does_not_exist()
     {
         $this->actingAs($this->manriskUser)
@@ -243,7 +244,7 @@ class MasterRiskControllerTest extends TestCase
             ->assertStatus(500);
     }
 
-    /** @test */
+    #[Test]
     public function store_mitigation_fails_when_cause_does_not_exist()
     {
         $this->actingAs($this->manriskUser)
@@ -253,7 +254,7 @@ class MasterRiskControllerTest extends TestCase
             ->assertStatus(500);
     }
 
-    /** @test */
+    #[Test]
     public function index_page_query_loads_with_eager_relationships()
     {
         $item = RiskItem::factory()

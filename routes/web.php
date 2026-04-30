@@ -14,22 +14,29 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     $user = auth()->user();
     $userBranchId = $user->branch_id;
+    $role = $user?->primaryRoleName();
 
-    // Laporan terbaru (untuk tabel) — role maker lihat laporan sendiri, kacab/korwil lihat cabangnya
-    if ($user->hasAnyRole(['kacab', 'korwil', 'manrisk'])) {
-        // Kacab lihat laporan di cabangnya, korwil/manrisk lihat semua
-        if ($user->hasRole('kacab')) {
-            $recentReports = RiskReport::with(['user', 'branch', 'item'])
-                ->where('branch_id', $userBranchId)
-                ->latest()
-                ->take(10)
-                ->get();
-        } else {
-            $recentReports = RiskReport::with(['user', 'branch', 'item'])
-                ->latest()
-                ->take(10)
-                ->get();
-        }
+    // Tentukan branch IDs yang bisa dilihat user
+    if ($role === 'korwil') {
+        $branchIds = \App\Models\Branch::where('korwil_id', $user->id)
+            ->where('is_active', true)
+            ->pluck('id');
+    } elseif ($role === 'kacab') {
+        $branchIds = collect([$userBranchId]);
+    } elseif ($role === 'manrisk') {
+        $branchIds = \App\Models\Branch::where('is_active', true)->pluck('id');
+    } else {
+        // Maker (teller/ca/csr/security) — lihat laporan sendiri
+        $branchIds = collect();
+    }
+
+    // Laporan terbaru (untuk tabel)
+    if (in_array($role, ['korwil', 'kacab', 'manrisk'])) {
+        $recentReports = RiskReport::with(['user', 'branch', 'item'])
+            ->whereIn('branch_id', $branchIds)
+            ->latest()
+            ->take(10)
+            ->get();
     } else {
         // Teller/CA/CSR/Security — lihat laporan sendiri
         $recentReports = RiskReport::with(['user', 'branch', 'item'])
@@ -39,23 +46,59 @@ Route::get('/dashboard', function () {
             ->get();
     }
 
-    // Stat cards
-    $totalLaporanBulanIni = RiskReport::whereMonth('created_at', now()->month)
+    // Stat cards — difilter sesuai role
+    $reportQuery = RiskReport::query();
+    if ($role === 'korwil') {
+        $reportQuery->whereIn('branch_id', $branchIds);
+    } elseif ($role === 'kacab') {
+        $reportQuery->where('branch_id', $userBranchId);
+    } elseif (in_array($role, ['teller', 'ca', 'csr', 'security'])) {
+        $reportQuery->where('user_id', $user->id);
+    }
+    // ManRisk ga perlu filter
+
+    $totalLaporanBulanIni = (clone $reportQuery)
+        ->whereMonth('created_at', now()->month)
         ->whereYear('created_at', now()->year)
         ->count();
 
-    $totalPending = RiskReport::where('approval_status', 'pending')->count();
-    $totalApproved = RiskReport::where('approval_status', 'approved')->count();
-    $totalLossApproved = RiskReport::where('approval_status', 'approved')
+    $totalPending = (clone $reportQuery)
+        ->where(function ($q) {
+            $q->where('approval_status', 'pending')
+              ->orWhere('approval_status', 'pending_kacab')
+              ->orWhere('approval_status', 'pending_korwil');
+        })
+        ->count();
+
+    $totalApproved = (clone $reportQuery)
+        ->where('approval_status', 'approved')
+        ->count();
+
+    $totalLossApproved = (clone $reportQuery)
+        ->where('approval_status', 'approved')
         ->where('kategori', 'finansial')
         ->sum('dampak_finansial');
+
+    // Hitung badge pending untuk checker
+    $pendingCount = 0;
+    if ($role === 'kacab') {
+        $pendingCount = RiskReport::where('branch_id', $userBranchId)
+            ->where('approval_status', 'pending_kacab')
+            ->count();
+    } elseif ($role === 'korwil') {
+        $pendingCount = RiskReport::whereIn('branch_id', $branchIds)
+            ->where('approval_status', 'pending_korwil')
+            ->count();
+    }
 
     return view('dashboard', compact(
         'recentReports',
         'totalLaporanBulanIni',
         'totalPending',
         'totalApproved',
-        'totalLossApproved'
+        'totalLossApproved',
+        'pendingCount',
+        'role'
     ));
 })->middleware(['auth', 'verified'])->name('dashboard');
 

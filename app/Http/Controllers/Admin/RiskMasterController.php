@@ -34,8 +34,8 @@ class RiskMasterController extends Controller
     public function storeCause(Request $request, $itemId)
     {
         $request->validate([
-            'penyebab' => 'required|string',
-            'mitigasi' => 'nullable|string',
+            'penyebab' => 'required|string|max:255',
+            'mitigasi' => 'nullable|string|max:255',
         ]);
 
         $cause = RiskCause::create([
