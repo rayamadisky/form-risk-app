@@ -5,13 +5,58 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RiskReportController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Admin\RiskMasterController;
+use App\Models\RiskReport;
 
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $user = auth()->user();
+    $userBranchId = $user->branch_id;
+
+    // Laporan terbaru (untuk tabel) — role maker lihat laporan sendiri, kacab/korwil lihat cabangnya
+    if ($user->hasAnyRole(['kacab', 'korwil', 'manrisk'])) {
+        // Kacab lihat laporan di cabangnya, korwil/manrisk lihat semua
+        if ($user->hasRole('kacab')) {
+            $recentReports = RiskReport::with(['user', 'branch', 'item'])
+                ->where('branch_id', $userBranchId)
+                ->latest()
+                ->take(10)
+                ->get();
+        } else {
+            $recentReports = RiskReport::with(['user', 'branch', 'item'])
+                ->latest()
+                ->take(10)
+                ->get();
+        }
+    } else {
+        // Teller/CA/CSR/Security — lihat laporan sendiri
+        $recentReports = RiskReport::with(['user', 'branch', 'item'])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->take(10)
+            ->get();
+    }
+
+    // Stat cards
+    $totalLaporanBulanIni = RiskReport::whereMonth('created_at', now()->month)
+        ->whereYear('created_at', now()->year)
+        ->count();
+
+    $totalPending = RiskReport::where('approval_status', 'pending')->count();
+    $totalApproved = RiskReport::where('approval_status', 'approved')->count();
+    $totalLossApproved = RiskReport::where('approval_status', 'approved')
+        ->where('kategori', 'finansial')
+        ->sum('dampak_finansial');
+
+    return view('dashboard', compact(
+        'recentReports',
+        'totalLaporanBulanIni',
+        'totalPending',
+        'totalApproved',
+        'totalLossApproved'
+    ));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 
@@ -72,14 +117,14 @@ Route::middleware(['auth', 'role:manrisk'])->group(function () {
     // Rute buat update penyebab & mitigasi
     Route::patch('/admin/risk-master/cause/{id}', [\App\Http\Controllers\Admin\RiskMasterController::class, 'updateCause'])->name('admin.risk_master.update_cause');
 
+    // Rute tambah mitigasi ke cause yang sudah ada (terpisah dari storeCause)
+    Route::post('/admin/risk-master/cause/{causeId}/mitigation', [\App\Http\Controllers\Admin\RiskMasterController::class, 'storeMitigation'])->name('admin.risk_master.store_mitigation');
+
     // Rute Manajemen Master Data Cabang (Khusus ManRisk)
     Route::get('/branches-management', [App\Http\Controllers\BranchManagementController::class, 'index'])->name('branches.index');
     Route::put('/branches-management/{id}', [App\Http\Controllers\BranchManagementController::class, 'update'])->name('branches.update');
     Route::post('/branches-management', [App\Http\Controllers\BranchManagementController::class, 'store'])->name('branches.store');
 
-    Route::get('/master-risiko', [App\Http\Controllers\MasterRiskController::class, 'index'])->name('master_risk.index');
-    Route::post('/master-risiko/cause/{itemId}', [App\Http\Controllers\MasterRiskController::class, 'storeCause'])->name('master_risk.store_cause');
-    Route::post('/master-risiko/mitigation/{causeId}', [App\Http\Controllers\MasterRiskController::class, 'storeMitigation'])->name('master_risk.store_mitigation');
 });
 
 require __DIR__ . '/auth.php';

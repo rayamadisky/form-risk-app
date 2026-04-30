@@ -22,7 +22,7 @@ class RiskMasterController extends Controller
     {
         $request->validate([
             'nama_risiko' => 'required|string|max:255',
-            'kategori' => 'required|in:finansial,non-finansial', // TAMBAHAN INI
+            'kategori' => 'required|in:finansial,non-finansial',
             'role_target' => 'required|in:teller,ca,csr,security,kacab,korwil',
         ]);
 
@@ -30,7 +30,7 @@ class RiskMasterController extends Controller
         return back()->with('success', 'Pertanyaan risiko baru berhasil ditambahkan!');
     }
 
-    // 3. SIMPAN PENYEBAB & MITIGASI (Bunderling)
+    // 3. SIMPAN PENYEBAB & MITIGASI (Bundling)
     public function storeCause(Request $request, $itemId)
     {
         $request->validate([
@@ -53,14 +53,29 @@ class RiskMasterController extends Controller
         return back()->with('success', 'Penyebab dan Mitigasi berhasil ditambahkan!');
     }
 
-    // 4. HAPUS PERTANYAAN (Gua kasih fitur hapus karena ini Master Data, bukan data transaksi)
+    // 3b. SIMPAN MITIGASI KE CAUSE YANG SUDAH ADA (dipisah dari storeCause)
+    public function storeMitigation(Request $request, $causeId)
+    {
+        $validated = $request->validate([
+            'mitigasi' => 'required|string|max:255',
+        ]);
+
+        RiskMitigation::create([
+            'risk_cause_id' => $causeId,
+            'mitigasi' => $validated['mitigasi'],
+        ]);
+
+        return back()->with('success', 'Mitigasi berhasil ditambahkan!');
+    }
+
+    // 4. HAPUS PERTANYAAN
     public function destroyItem($id)
     {
         RiskItem::findOrFail($id)->delete();
         return back()->with('success', 'Pertanyaan berhasil dihapus dari sistem.');
     }
 
-    // FUNGSI UPDATE PENYEBAB & MITIGASI (INLINE)
+    // 5. UPDATE PENYEBAB & MITIGASI
     public function updateCause(Request $request, $id)
     {
         $request->validate([
@@ -68,11 +83,9 @@ class RiskMasterController extends Controller
             'mitigasi' => 'nullable|string|max:255'
         ]);
 
-        // 1. Cari dan Update Penyebab
-        $cause = \App\Models\RiskCause::findOrFail($id);
+        $cause = RiskCause::findOrFail($id);
         $cause->update(['penyebab' => $request->penyebab]);
 
-        // 2. Eksekusi Mitigasi (Update, Create, atau Delete)
         if ($request->filled('mitigasi')) {
             $mitigation = $cause->mitigations()->first();
             if ($mitigation) {
@@ -81,7 +94,6 @@ class RiskMasterController extends Controller
                 $cause->mitigations()->create(['mitigasi' => $request->mitigasi]);
             }
         } else {
-            // Kalau form mitigasi dikosongin, hapus data mitigasi yang nempel
             $cause->mitigations()->delete();
         }
 

@@ -149,7 +149,7 @@
 
     <script>
         // 1. Ambil data master dari backend, ubah jadi format JSON biar bisa dibaca Javascript
-        const riskData = @json($riskItems);
+        const riskData = @json($riskItems); 
 
         const itemSelect = document.getElementById('riskItemSelect');
         const causeSelect = document.getElementById('riskCauseSelect');
